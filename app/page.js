@@ -9,13 +9,6 @@ export default function Library() {
   const [lang, setLang] = useState('en');
   const [selectedBook, setSelectedBook] = useState(null);
 
-  const languages = [
-    { code: 'en', name: 'English' },
-    { code: 'hi', name: 'Hindi' },
-    { code: 'es', name: 'Spanish' },
-    { code: 'fr', name: 'French' }
-  ];
-
   const searchBooks = async (e) => {
     if (e) e.preventDefault();
     if (!query) return;
@@ -33,7 +26,6 @@ export default function Library() {
 
   return (
     <div className="min-h-screen bg-white p-4 md:p-10 text-black">
-      {/* Welcome Line - Ab hamesha top par rahegi */}
       <div className="max-w-5xl mx-auto text-center mb-2">
         <p className="text-blue-600 font-bold tracking-widest uppercase text-sm animate-pulse">
           ✨ Brightway Library Welcomes You ✨
@@ -51,16 +43,18 @@ export default function Library() {
             onChange={(e) => setLang(e.target.value)}
             className="bg-white p-3 rounded-2xl border-none outline-none font-bold text-gray-700 cursor-pointer"
           >
-            {languages.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
+            <option value="en">English</option>
+            <option value="hi">Hindi</option>
+            <option value="es">Spanish</option>
           </select>
           <input 
             type="text" 
-            placeholder="Book ka naam likhein..." 
+            placeholder="Search books..." 
             className="flex-1 p-4 bg-transparent outline-none text-xl text-black"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          <button type="submit" className="bg-blue-600 hover:bg-black text-white px-10 py-4 rounded-2xl font-black transition-all">
+          <button type="submit" className="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black shadow-lg">
             {loading ? '...' : 'SEARCH'}
           </button>
         </form>
@@ -68,45 +62,52 @@ export default function Library() {
 
       <main className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {books.map((book) => (
-          <div key={book.id} className="group bg-white border border-gray-100 rounded-3xl p-4 hover:shadow-2xl transition-all">
-            <div className="relative aspect-[3/4] mb-4 overflow-hidden rounded-2xl shadow-md">
+          <div key={book.id} className="bg-white border border-gray-100 rounded-3xl p-4 shadow-sm">
+            <div className="aspect-[3/4] mb-4 overflow-hidden rounded-2xl">
               <img 
                 src={book.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || 'https://via.placeholder.com/150'} 
                 className="w-full h-full object-cover"
-                alt="cover"
+                alt="book cover"
               />
-              <button 
-                onClick={() => setSelectedBook(book.id)}
-                className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-bold transition-all"
-              >
-                OPEN BOOK 📖
-              </button>
             </div>
             <h2 className="font-bold text-lg line-clamp-1">{book.volumeInfo.title}</h2>
-            <p className="text-blue-600 text-sm mb-4">{book.volumeInfo.authors?.[0] || 'Unknown'}</p>
-            <button 
-              onClick={() => setSelectedBook(book.id)}
-              className="w-full bg-gray-900 text-white text-xs py-3 rounded-xl font-bold"
-            >
-              READ FIRST CHAPTER
-            </button>
+            
+            <div className="mt-4 space-y-2">
+              {/* Force Open in New Tab */}
+              <button 
+                onClick={() => setSelectedBook(book.id)}
+                className="w-full bg-blue-600 text-white text-xs py-3 rounded-xl font-bold"
+              >
+                READ FIRST CHAPTER
+              </button>
+              
+              <a 
+                href={`https://www.amazon.com/s?k=${encodeURIComponent(book.volumeInfo.title)}`} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="block text-center bg-yellow-400 text-black text-xs py-3 rounded-xl font-bold shadow-sm"
+              >
+                BUY ON AMAZON 🛒
+              </a>
+            </div>
           </div>
         ))}
       </main>
 
-      {/* Reader Overlay */}
+      {/* Reader Modal */}
       {selectedBook && (
-        <div className="fixed inset-0 bg-black/95 z-50 p-4 flex flex-col items-center">
+        <div className="fixed inset-0 bg-black/95 z-[9999] p-4 flex flex-col">
           <button 
             onClick={() => setSelectedBook(null)}
-            className="self-end text-white text-5xl mb-2 font-light hover:text-red-500"
+            className="self-end text-white text-5xl p-4"
           >
             &times;
           </button>
-          <div className="w-full max-w-5xl h-full bg-white rounded-t-3xl overflow-hidden">
+          <div className="flex-1 bg-white rounded-t-3xl overflow-hidden shadow-2xl">
             <iframe 
               src={`https://books.google.com/books?id=${selectedBook}&printsec=frontcover&output=embed`} 
               className="w-full h-full border-none"
+              title="reader"
             />
           </div>
         </div>

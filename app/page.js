@@ -7,10 +7,8 @@ export default function Library() {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [lang, setLang] = useState('en');
-  
-  // Modal states
   const [activeBook, setActiveBook] = useState(null);
-  const [modalType, setModalType] = useState(null); // 'read', 'summary', 'points'
+  const [modalType, setModalType] = useState(null);
 
   const searchBooks = async (e) => {
     if (e) e.preventDefault();
@@ -21,126 +19,106 @@ export default function Library() {
       const data = await res.json();
       setBooks(data.items || []);
     } catch (err) {
-      console.error("Error:", err);
+      console.error("Search error:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const openModal = (book, type) => {
-    setActiveBook(book);
-    setModalType(type);
-  };
-
   return (
-    <div className="min-h-screen bg-white p-4 md:p-10 text-black">
-      <div className="max-w-5xl mx-auto text-center mb-2">
-        <p className="text-blue-600 font-bold tracking-widest uppercase text-sm animate-pulse">
-          ✨ Brightway Library Welcomes You ✨
-        </p>
-      </div>
-
-      <header className="max-w-5xl mx-auto text-center mb-12">
-        <h1 className="text-6xl font-black mb-4 tracking-tighter">
-          BRIGHTWAY <span className="text-blue-600">LIBRARY</span>
-        </h1>
+    <div style={{ minHeight: '100vh', backgroundColor: '#fff', padding: '20px', fontFamily: 'sans-serif', color: '#000' }}>
+      
+      {/* Header Section */}
+      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+        <p style={{ color: '#2563eb', fontWeight: 'bold', fontSize: '14px' }}>✨ BRIGHTWAY LIBRARY WELCOMES YOU ✨</p>
+        <h1 style={{ fontSize: '48px', fontWeight: '900', margin: '10px 0' }}>BRIGHTWAY <span style={{ color: '#2563eb' }}>LIBRARY</span></h1>
         
-        <form onSubmit={searchBooks} className="flex flex-col md:flex-row gap-3 mt-8 bg-gray-100 p-3 rounded-3xl shadow-inner border border-gray-200">
-          <select value={lang} onChange={(e) => setLang(e.target.value)} className="bg-white p-3 rounded-2xl border-none font-bold text-gray-700 outline-none">
+        <form onSubmit={searchBooks} style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px' }}>
+          <select value={lang} onChange={(e) => setLang(e.target.value)} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }}>
             <option value="en">English</option>
             <option value="hi">Hindi</option>
           </select>
           <input 
-            type="text" placeholder="Search books..." className="flex-1 p-4 bg-transparent outline-none text-xl text-black"
+            type="text" placeholder="Search any book..." 
             value={query} onChange={(e) => setQuery(e.target.value)}
+            style={{ padding: '10px 20px', width: '300px', borderRadius: '8px', border: '1px solid #ddd' }}
           />
-          <button type="submit" className="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black shadow-lg hover:bg-black transition-all">
+          <button type="submit" style={{ padding: '10px 30px', backgroundColor: '#2563eb', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
             {loading ? '...' : 'SEARCH'}
           </button>
         </form>
-      </header>
+      </div>
 
-      <main className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      {/* Grid of Books */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '30px', maxWidth: '1200px', margin: '0 auto' }}>
         {books.map((book) => (
-          <div key={book.id} className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm hover:shadow-xl transition-all flex flex-col">
-            <div className="aspect-[3/4] mb-4 overflow-hidden rounded-2xl bg-gray-50 shadow-inner">
-              <img 
-                src={book.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || 'https://via.placeholder.com/150'} 
-                className="w-full h-full object-cover" alt="cover"
-              />
-            </div>
-            <h2 className="font-bold text-lg line-clamp-1 mb-4">{book.volumeInfo.title}</h2>
+          <div key={book.id} style={{ border: '1px solid #eee', borderRadius: '15px', padding: '15px', textAlign: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+            <img 
+              src={book.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || 'https://via.placeholder.com/150'} 
+              style={{ width: '100%', borderRadius: '10px', marginBottom: '15px' }} 
+              alt="book"
+            />
+            <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '15px', height: '40px', overflow: 'hidden' }}>{book.volumeInfo.title}</h3>
             
-            {/* 4 Action Buttons */}
-            <div className="grid grid-cols-1 gap-2">
-              <button onClick={() => openModal(book, 'read')} className="w-full bg-blue-600 text-white text-[10px] font-bold py-3 rounded-xl hover:bg-blue-700">
+            {/* Buttons Section */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button 
+                onClick={() => { setActiveBook(book); setModalType('read'); }}
+                style={{ backgroundColor: '#2563eb', color: '#fff', border: 'none', padding: '10px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', fontSize: '12px' }}>
                 📖 READ THE BOOK
               </button>
               
-              <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => openModal(book, 'summary')} className="bg-gray-800 text-white text-[10px] font-bold py-3 rounded-xl hover:bg-black">
+              <div style={{ display: 'flex', gap: '5px' }}>
+                <button 
+                  onClick={() => { setActiveBook(book); setModalType('summary'); }}
+                  style={{ flex: 1, backgroundColor: '#1f2937', color: '#fff', border: 'none', padding: '10px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', fontSize: '11px' }}>
                   📝 SUMMARY
                 </button>
-                <button onClick={() => openModal(book, 'points')} className="bg-gray-100 text-black text-[10px] font-bold py-3 rounded-xl hover:bg-gray-200 border border-gray-200">
+                <button 
+                  onClick={() => { setActiveBook(book); setModalType('points'); }}
+                  style={{ flex: 1, backgroundColor: '#f3f4f6', color: '#000', border: '1px solid #ddd', padding: '10px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', fontSize: '11px' }}>
                   💡 KEY POINTS
                 </button>
               </div>
 
               <a 
                 href={`https://www.amazon.com/s?k=${encodeURIComponent(book.volumeInfo.title)}`} 
-                target="_blank" className="block text-center bg-yellow-400 text-black text-[10px] font-bold py-3 rounded-xl hover:bg-yellow-500"
-              >
+                target="_blank" rel="noopener noreferrer"
+                style={{ textDecoration: 'none', backgroundColor: '#fbbf24', color: '#000', padding: '10px', borderRadius: '8px', fontWeight: 'bold', fontSize: '12px' }}>
                 🛒 BUY ON AMAZON
               </a>
             </div>
           </div>
         ))}
-      </main>
+      </div>
 
-      {/* --- ALL-IN-ONE MODAL --- */}
+      {/* Popup Modal */}
       {activeBook && (
-        <div className="fixed inset-0 bg-black/95 z-[9999] flex flex-col items-center justify-center p-4">
-          <div className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[90vh]">
-            <div className="p-4 border-b flex justify-between items-center bg-gray-50">
-              <h3 className="font-bold text-gray-800 uppercase tracking-tight truncate pr-4">
-                {modalType === 'read' && '📖 Preview: ' + activeBook.volumeInfo.title}
-                {modalType === 'summary' && '📝 Summary: ' + activeBook.volumeInfo.title}
-                {modalType === 'points' && '💡 Key Insights'}
-              </h3>
-              <button onClick={() => {setActiveBook(null); setModalType(null);}} className="bg-red-500 text-white px-4 py-2 rounded-xl font-bold">CLOSE</button>
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.9)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
+          <div style={{ backgroundColor: '#fff', width: '90%', maxWidth: '900px', height: '80vh', borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '15px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f9fafb' }}>
+              <strong style={{ fontSize: '14px' }}>{activeBook.volumeInfo.title}</strong>
+              <button onClick={() => { setActiveBook(null); setModalType(null); }} style={{ backgroundColor: '#ef4444', color: '#fff', border: 'none', padding: '5px 15px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>CLOSE</button>
             </div>
             
-            <div className="flex-1 overflow-y-auto p-6 text-black">
+            <div style={{ flex: 1, padding: '20px', overflowY: 'auto' }}>
               {modalType === 'read' && (
                 <iframe 
                   src={`https://books.google.com/books?id=${activeBook.id}&printsec=frontcover&output=embed`} 
-                  className="w-full h-full border-none rounded-xl"
+                  style={{ width: '100%', height: '100%', border: 'none' }}
                 />
               )}
-
               {modalType === 'summary' && (
-                <div className="prose prose-blue">
-                  <p className="text-lg leading-relaxed italic text-gray-700">
-                    {activeBook.volumeInfo.description?.replace(/<\/?[^>]+(>|$)/g, "") || "Summary is not available for this specific title."}
-                  </p>
-                </div>
+                <p style={{ lineHeight: '1.6', fontSize: '16px', color: '#374151' }}>
+                  {activeBook.volumeInfo.description?.replace(/<\/?[^>]+(>|$)/g, "") || "Summary not available."}
+                </p>
               )}
-
               {modalType === 'points' && (
-                <div className="space-y-4">
-                  <h4 className="text-xl font-bold text-blue-600">Main Takeaways:</h4>
-                  <ul className="space-y-3">
-                    {activeBook.volumeInfo.description 
-                      ? activeBook.volumeInfo.description.split('. ').slice(0, 5).map((point, i) => (
-                          <li key={i} className="flex items-start gap-3 bg-blue-50 p-4 rounded-2xl border border-blue-100">
-                            <span className="text-blue-600 font-bold">0{i+1}.</span>
-                            <span>{point.replace(/<\/?[^>]+(>|$)/g, "")}.</span>
-                          </li>
-                        ))
-                      : <li className="text-gray-400 italic">No key points found.</li>
-                    }
-                  </ul>
-                </div>
+                <ul style={{ paddingLeft: '20px' }}>
+                  {(activeBook.volumeInfo.description?.split('. ').slice(0, 5) || ["Points not found"]).map((pt, i) => (
+                    <li key={i} style={{ marginBottom: '15px', color: '#1f2937' }}><strong>0{i+1}.</strong> {pt.replace(/<\/?[^>]+(>|$)/g, "")}</li>
+                  ))}
+                </ul>
               )}
             </div>
           </div>

@@ -9,163 +9,126 @@ export default function Library() {
   const [lang, setLang] = useState('en');
   const [activeBook, setActiveBook] = useState(null);
   const [modalType, setModalType] = useState(null);
-  const [contentType, setContentType] = useState('books'); 
-  const [newsFilter, setNewsFilter] = useState('National');
-  const [regionalLang, setRegionalLang] = useState('All');
+  const [genre, setGenre] = useState('All');
 
-  // 1. All Indian Regional Languages Included
-  const indianLanguages = [
-    { code: 'hi', name: 'Hindi (हिंदी)' }, { code: 'pa', name: 'Punjabi (ਪੰਜਾਬੀ)' },
-    { code: 'mr', name: 'Marathi (मराठी)' }, { code: 'gu', name: 'Gujarati (ગુજરાતી)' },
-    { code: 'ta', name: 'Tamil (தமிழ்)' }, { code: 'te', name: 'Telugu (తెలుగు)' },
-    { code: 'kn', name: 'Kannada (ಕನ್ನಡ)' }, { code: 'ml', name: 'Malayalam (മലയാളം)' },
-    { code: 'bn', name: 'Bengali (বাংলা)' }, { code: 'as', name: 'Assamese (অসমীয়া)' },
-    { code: 'or', name: 'Odia (ଓଡ଼ିଆ)' }, { code: 'ur', name: 'Urdu (اردو)' }
+  // 1. Full Language Support: Indian + International
+  const allLanguages = [
+    { group: "Common", langs: [{ code: 'en', name: 'English 🇺🇸' }, { code: 'hi', name: 'Hindi 🇮🇳' }] },
+    { group: "Indian Regional", langs: [
+      { code: 'pa', name: 'Punjabi 🇮🇳' }, { code: 'mr', name: 'Marathi 🇮🇳' }, 
+      { code: 'gu', name: 'Gujarati 🇮🇳' }, { code: 'ta', name: 'Tamil 🇮🇳' }, 
+      { code: 'bn', name: 'Bengali 🇮🇳' }, { code: 'ur', name: 'Urdu 🇵🇰' }
+    ]},
+    { group: "International", langs: [
+      { code: 'fr', name: 'French 🇫🇷' }, { code: 'es', name: 'Spanish 🇪🇸' }, 
+      { code: 'ar', name: 'Arabic 🇸🇦' }, { code: 'ja', name: 'Japanese 🇯🇵' }, 
+      { code: 'de', name: 'German 🇩🇪' }, { code: 'ru', name: 'Russian 🇷🇺' }
+    ]}
   ];
 
-  const bookGenres = ["All", "Self-Help", "Business", "History", "Psychology", "Science"];
+  const bookGenres = ["All", "Self-Help", "Business", "Psychology", "History", "Science", "Mystery"];
 
-  const newspaperData = [
-    { title: "The Times of India", cat: "National", lang: "English", link: "https://timesofindia.indiatimes.com/", logo: "🇮🇳" },
-    { title: "The Hindu", cat: "National", lang: "English", link: "https://www.thehindu.com/", logo: "📰" },
-    { title: "Dainik Jagran", cat: "National", lang: "Hindi", link: "https://www.jagran.com/", logo: "🇮🇳" },
-    { title: "Lokmat", cat: "Regional", lang: "Marathi", link: "https://www.lokmat.com/", logo: "🚩" },
-    { title: "Ajit", cat: "Regional", lang: "Punjabi", link: "https://www.ajitjalandhar.com/", logo: "🌾" },
-    { title: "Daily Thanthi", cat: "Regional", lang: "Tamil", link: "https://www.dailythanthi.com/", logo: "⚓" },
-    { title: "Anandabazar Patrika", cat: "Regional", lang: "Bengali", link: "https://www.anandabazar.com/", logo: "🎨" },
-    { title: "NY Times", cat: "International", lang: "English", link: "https://www.nytimes.com/", logo: "🇺🇸" }
-  ];
+  // AI Book DNA Logic (Bina padhe sab jaanne ke liye)
+  const getBookDNA = (book) => {
+    const desc = book.volumeInfo.description?.replace(/<\/?[^>]+(>|$)/g, "") || "Detailing deep concepts of the book...";
+    const points = desc.split(/[.!?]+\s+/).filter(s => s.length > 30).slice(0, 4);
+    const labels = ["🎯 Core Logic", "🚀 Action Plan", "⚠️ Common Mistake", "💎 Final Wisdom"];
+    return points.map((p, i) => ({ label: labels[i] || "Insight", text: p }));
+  };
 
-  const searchContent = async () => {
+  const searchContent = async (e) => {
+    if (e) e.preventDefault();
     setLoading(true);
     try {
-      const q = (query || 'trending');
-      const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${q}&langRestrict=${lang}&maxResults=20`);
+      const q = genre === 'All' ? (query || 'trending') : `${query} subject:${genre}`;
+      const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${q}&langRestrict=${lang}&maxResults=24`);
       const data = await res.json();
       setBooks(data.items || []);
     } catch (err) { console.error(err); } finally { setLoading(false); }
   };
 
-  useEffect(() => { if(contentType === 'books') searchContent(); }, [lang]);
-
-  const filteredNews = newspaperData.filter(paper => {
-    if (newsFilter === 'Regional' && regionalLang !== 'All') return paper.lang === regionalLang;
-    return paper.cat === newsFilter;
-  });
+  useEffect(() => { searchContent(); }, [genre, lang]);
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#1a120b', color: '#f5ebe0', fontFamily: "'Georgia', serif" }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0f0f0f', color: '#f5ebe0', fontFamily: "'Georgia', serif" }}>
       
-      {/* Wooden Shelf Header */}
-      <nav style={{ padding: '30px 5%', background: '#3c2a21', borderBottom: '10px solid #261a14', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 style={{ margin: 0, fontSize: '32px', fontWeight: 'bold', letterSpacing: '2px', color: '#e5e5e5', textShadow: '2px 2px #000' }}>
-          BRIGHTWAY <span style={{color: '#d4a373'}}>LIBRARY</span>
-        </h1>
+      {/* Header with Integrated Search & International Langs */}
+      <nav style={{ padding: '20px 5%', background: '#261a14', borderBottom: '5px solid #d4a373', position: 'sticky', top: 0, zIndex: 100 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+          <h1 style={{ margin: 0, fontSize: '26px', fontWeight: 'bold', color: '#d4a373' }}>BRIGHTWAY <span style={{color: '#fff'}}>LIBRARY</span></h1>
+          
+          <form onSubmit={searchContent} style={{ display: 'flex', background: '#1a120b', borderRadius: '30px', padding: '5px', border: '1px solid #d4a373', width: '350px' }}>
+            <input 
+              type="text" placeholder="Search any book DNA..." value={query} onChange={(e) => setQuery(e.target.value)}
+              style={{ flex: 1, background: 'transparent', border: 'none', color: '#fff', padding: '8px 15px', outline: 'none', fontSize: '13px' }}
+            />
+            <button type="submit" style={{ background: '#d4a373', border: 'none', borderRadius: '25px', padding: '8px 15px', cursor: 'pointer', fontWeight: 'bold' }}>🔍</button>
+          </form>
 
-        <div style={{ display: 'flex', gap: '20px' }}>
-          <select value={lang} onChange={(e) => setLang(e.target.value)} style={{ padding: '10px', borderRadius: '5px', background: '#1a120b', color: '#fff', border: '1px solid #d4a373' }}>
-            <option value="en">English</option>
-            {indianLanguages.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
+          <select value={lang} onChange={(e) => setLang(e.target.value)} style={{ background: '#1a120b', color: '#fff', border: '1px solid #d4a373', padding: '10px', borderRadius: '8px', cursor: 'pointer' }}>
+            {allLanguages.map(group => (
+              <optgroup label={group.group} key={group.group}>
+                {group.langs.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
+              </optgroup>
+            ))}
           </select>
-          <div style={{ display: 'flex', background: '#261a14', borderRadius: '10px', padding: '5px' }}>
-            <button onClick={() => setContentType('books')} style={{ padding: '10px 20px', background: contentType === 'books' ? '#d4a373' : 'transparent', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>BOOKS</button>
-            <button onClick={() => setContentType('news')} style={{ padding: '10px 20px', background: contentType === 'news' ? '#d4a373' : 'transparent', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>NEWSSTAND</button>
-          </div>
         </div>
       </nav>
 
-      {/* Main Content View */}
-      <main style={{ padding: '50px 5%' }}>
-        {contentType === 'books' ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '60px 40px' }}>
-            {books.map((book) => (
-              <div key={book.id} style={{ perspective: '1000px' }}>
-                {/* 3D Book Visual */}
-                <div style={{ 
-                  width: '100%', aspectRatio: '2/3', position: 'relative', 
-                  transformStyle: 'preserve-3d', transition: 'transform 0.5s',
-                  boxShadow: '10px 10px 20px rgba(0,0,0,0.6)',
-                  borderRadius: '2px 10px 10px 2px',
-                  background: '#333'
-                }} 
-                onMouseEnter={e => e.currentTarget.style.transform = 'rotateY(-25deg)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'rotateY(0deg)'}
-                >
-                  <img src={book.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || 'https://via.placeholder.com/150'} style={{ width: '100%', height: '100%', borderRadius: '2px 10px 10px 2px', objectFit: 'cover' }} alt="cover" />
-                  {/* Book Spine Detail */}
-                  <div style={{ position: 'absolute', left: 0, top: 0, width: '15px', height: '100%', background: 'linear-gradient(to right, rgba(0,0,0,0.5), transparent)', borderLeft: '2px solid rgba(255,255,255,0.2)' }}></div>
-                </div>
+      {/* Genre Filter Shelf */}
+      <div style={{ background: '#1a120b', padding: '15px 5%', display: 'flex', gap: '10px', overflowX: 'auto' }}>
+        {bookGenres.map(g => (
+          <button key={g} onClick={() => setGenre(g)} style={{ padding: '8px 20px', borderRadius: '20px', background: genre === g ? '#d4a373' : 'transparent', color: genre === g ? '#000' : '#d4a373', border: '1px solid #d4a373', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap', fontSize: '12px' }}>{g}</button>
+        ))}
+      </div>
 
-                <h4 style={{ fontSize: '14px', textAlign: 'center', margin: '15px 0', height: '35px', overflow: 'hidden', color: '#f5ebe0' }}>{book.volumeInfo.title}</h4>
-                
-                {/* Features Restored */}
-                <div style={{ display: 'grid', gap: '5px' }}>
-                   <button onClick={() => { setActiveBook(book); setModalType('points'); }} style={{ padding: '8px', background: '#d4a373', color: '#000', border: 'none', fontWeight: 'bold', cursor: 'pointer', borderRadius: '3px' }}>💡 DNA</button>
-                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
-                      <button onClick={() => { setActiveBook(book); setModalType('read'); }} style={{ padding: '6px', background: '#fff', border: 'none', fontWeight: 'bold', fontSize: '10px' }}>READ</button>
-                      <a href={book.accessInfo?.pdf?.downloadLink || `https://www.google.com/search?q=${encodeURIComponent(book.volumeInfo.title + " filetype:pdf")}`} target="_blank" style={{ textDecoration: 'none', background: '#10b981', color: '#fff', padding: '6px', fontSize: '10px', textAlign: 'center', fontWeight: 'bold' }}>PDF</a>
-                   </div>
-                   <a href={`https://www.amazon.com/s?k=${encodeURIComponent(book.volumeInfo.title)}`} target="_blank" style={{ textDecoration: 'none', background: '#fbbf24', color: '#000', padding: '6px', fontSize: '10px', textAlign: 'center', fontWeight: 'bold' }}>AMAZON</a>
-                </div>
+      {/* 3D Book Grid */}
+      <main style={{ padding: '40px 5%' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '50px' }}>
+          {books.map((book) => (
+            <div key={book.id} style={{ textAlign: 'center' }}>
+              <div style={{ 
+                width: '100%', aspectRatio: '2/3', position: 'relative', borderRadius: '2px 10px 10px 2px', 
+                boxShadow: '8px 8px 20px rgba(0,0,0,0.7)', overflow: 'hidden', cursor: 'pointer', 
+                transition: 'transform 0.4s', borderLeft: '4px solid #333' 
+              }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-10px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+                <img src={book.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || 'https://via.placeholder.com/150'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="cover" />
               </div>
-            ))}
-          </div>
-        ) : (
-          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', gap: '20px', marginBottom: '40px', borderBottom: '2px solid #3c2a21', paddingBottom: '10px' }}>
-              {['National', 'International', 'Regional'].map(f => (
-                <button key={f} onClick={() => setNewsFilter(f)} style={{ background: 'none', border: 'none', color: newsFilter === f ? '#d4a373' : '#888', fontWeight: 'bold', cursor: 'pointer', fontSize: '18px' }}>{f.toUpperCase()}</button>
-              ))}
-              {newsFilter === 'Regional' && (
-                <select value={regionalLang} onChange={(e) => setRegionalLang(e.target.value)} style={{ padding: '5px', background: '#3c2a21', color: '#fff', border: '1px solid #d4a373' }}>
-                  <option value="All">Select Language</option>
-                  {indianLanguages.map(l => <option key={l.code} value={l.name.split(' ')[0]}>{l.name}</option>)}
-                </select>
-              )}
-            </div>
-
-            {/* Newspaper Table Interface */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '40px' }}>
-              {filteredNews.map((paper, idx) => (
-                <div key={idx} style={{ 
-                  background: '#fff', color: '#000', padding: '20px', 
-                  boxShadow: '5px 5px 15px rgba(0,0,0,0.3)',
-                  border: '1px solid #ddd',
-                  transform: `rotate(${idx % 2 === 0 ? '-1' : '1'}deg)`,
-                  position: 'relative'
-                }}>
-                  <div style={{ borderBottom: '4px double #000', textAlign: 'center', paddingBottom: '10px', marginBottom: '15px' }}>
-                    <h2 style={{ fontSize: '28px', margin: 0, fontFamily: "'Old Standard TT', serif", textTransform: 'uppercase' }}>{paper.title}</h2>
-                    <span style={{ fontSize: '10px' }}>ESTABLISHED 2026 | DAILY EDITION | {paper.lang}</span>
-                  </div>
-                  <div style={{ display: 'flex', gap: '15px' }}>
-                    <div style={{ flex: 1, fontSize: '12px', textAlign: 'justify', columnCount: 2, columnGap: '10px' }}>
-                      LATEST NEWS: Breaking headlines from across the nation. Read the full digital replica of today's newspaper with all columns and editorials included...
-                    </div>
-                  </div>
-                  <a href={paper.link} target="_blank" style={{ display: 'block', marginTop: '15px', padding: '10px', background: '#000', color: '#fff', textDecoration: 'none', textAlign: 'center', fontWeight: 'bold', fontSize: '12px' }}>READ FULL NEWSPAPER</a>
+              <h4 style={{ fontSize: '13px', margin: '15px 0', height: '35px', overflow: 'hidden', fontWeight: 'bold' }}>{book.volumeInfo.title}</h4>
+              
+              <div style={{ display: 'grid', gap: '5px' }}>
+                <button onClick={() => { setActiveBook(book); setModalType('dna'); }} style={{ padding: '10px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '11px' }}>✨ AI BOOK DNA</button>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
+                  <button onClick={() => { setActiveBook(book); setModalType('read'); }} style={{ padding: '8px', background: '#fff', color: '#000', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '10px' }}>READ</button>
+                  <a href={book.accessInfo?.pdf?.downloadLink || `https://www.google.com/search?q=${encodeURIComponent(book.volumeInfo.title + " filetype:pdf")}`} target="_blank" style={{ textDecoration: 'none', background: '#10b981', color: '#fff', padding: '8px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', textAlign: 'center' }}>PDF</a>
                 </div>
-              ))}
+                <a href={`https://www.amazon.com/s?k=${encodeURIComponent(book.volumeInfo.title)}`} target="_blank" style={{ textDecoration: 'none', background: '#fbbf24', color: '#000', padding: '8px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', textAlign: 'center' }}>BUY</a>
+              </div>
             </div>
-          </div>
-        )}
+          ))}
+        </div>
       </main>
 
-      {/* Modal View */}
+      {/* AI DNA Modal */}
       {activeBook && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.9)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
-          <div style={{ backgroundColor: '#fff', color: '#000', width: '100%', maxWidth: '900px', height: '90vh', borderRadius: '5px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ padding: '15px 30px', background: '#f8f8f8', borderBottom: '1px solid #ddd', display: 'flex', justifyContent: 'space-between' }}>
-              <h2 style={{ margin: 0, fontSize: '18px' }}>{activeBook.volumeInfo.title}</h2>
-              <button onClick={() => { setActiveBook(null); setModalType(null); }} style={{ background: '#000', color: '#fff', border: 'none', padding: '5px 20px', cursor: 'pointer' }}>CLOSE</button>
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.95)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
+          <div style={{ backgroundColor: '#fff', color: '#000', width: '100%', maxWidth: '800px', height: '80vh', borderRadius: '15px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '20px', borderBottom: '1px solid #ddd', display: 'flex', justifyContent: 'space-between', background: '#f8f9fa' }}>
+              <h2 style={{ fontSize: '16px', margin: 0 }}>{activeBook.volumeInfo.title}</h2>
+              <button onClick={() => { setActiveBook(null); setModalType(null); }} style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '5px 15px', borderRadius: '5px', cursor: 'pointer' }}>✕</button>
             </div>
-            <div style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
+            <div style={{ flex: 1, padding: '30px', overflowY: 'auto' }}>
               {modalType === 'read' ? (
                 <iframe src={`https://books.google.com/books?id=${activeBook.id}&printsec=frontcover&output=embed`} style={{ width: '100%', height: '100%', border: 'none' }} />
               ) : (
-                <div>
-                  <h3 style={{ borderBottom: '2px solid #d4a373', paddingBottom: '10px' }}>Knowledge DNA</h3>
-                  <p style={{ lineHeight: '1.8', fontSize: '17px' }}>{activeBook.volumeInfo.description?.replace(/<\/?[^>]+(>|$)/g, "") || "Analyzing text..."}</p>
+                <div style={{ display: 'grid', gap: '15px' }}>
+                  <div style={{ textAlign: 'center', color: '#3b82f6', fontWeight: 'bold', fontSize: '22px', marginBottom: '10px' }}>💡 AI Knowledge DNA</div>
+                  {getBookDNA(activeBook).map((item, i) => (
+                    <div key={i} style={{ padding: '20px', background: '#f0f7ff', borderRadius: '12px', borderLeft: '6px solid #3b82f6' }}>
+                      <strong style={{ color: '#3b82f6', display: 'block', marginBottom: '5px' }}>{item.label}</strong>
+                      <p style={{ margin: 0, lineHeight: '1.6', fontSize: '15px' }}>{item.text}</p>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

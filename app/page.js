@@ -1,121 +1,135 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function Library() {
   const [query, setQuery] = useState('');
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [lang, setLang] = useState('en'); 
+  const [lang, setLang] = useState('en');
   const [activeBook, setActiveBook] = useState(null);
-  const [modalType, setModalType] = useState(null); // Fixed the ReferenceError
+  const [modalType, setModalType] = useState(null);
+  const [contentType, setContentType] = useState('books'); // 'books' or 'news'
+  const [genre, setGenre] = useState('All');
 
-  const uiLabels = {
-    en: { brand: "BRIGHTWAY LIBRARY", welcome: "Welcome to Brightway Library", placeholder: "Search millions of books...", btnSearch: "Search", insightBtn: "💡 KEY POINTS", readBtn: "📖 READ BOOK", downloadBtn: "📥 PDF", buyBtn: "🛒 AMAZON", banner: "Read Free Library Books Online" },
-    hi: { brand: "ब्राइटवे लाइब्रेरी", welcome: "ब्राइटवे लाइब्रेरी में आपका स्वागत है", placeholder: "लाखों किताबें खोजें...", btnSearch: "खोजें", insightBtn: "💡 मुख्य बातें", readBtn: "📖 पढ़ें", downloadBtn: "📥 PDF", buyBtn: "🛒 अमेज़न", banner: "मुफ्त किताबें ऑनलाइन पढ़ें" },
-    // Yahan baki languages upar wale format me add ho jayengi
-  };
+  const genres = ["All", "Self-Help", "Fiction", "Business", "Science", "History", "Biography"];
+  
+  const newspapers = [
+    { id: 1, title: "The Times of India", editor: "Vineet Jain", link: "https://timesofindia.indiatimes.com/", logo: "🇮🇳" },
+    { id: 2, title: "The Hindu", editor: "Suresh Nambath", link: "https://www.thehindu.com/", logo: "📰" },
+    { id: 3, title: "The New York Times", editor: "Joseph Kahn", link: "https://www.nytimes.com/", logo: "🇺🇸" },
+    { id: 4, title: "Dainik Jagran", editor: "Sanjay Gupta", link: "https://www.jagran.com/", logo: "🇮🇳" },
+    { id: 5, title: "The Guardian", editor: "Katharine Viner", link: "https://www.theguardian.com/", logo: "🇬🇧" }
+  ];
 
   const languages = [
     { code: 'en', name: 'English' }, { code: 'hi', name: 'Hindi' }, { code: 'pa', name: 'Punjabi' },
-    { code: 'mr', name: 'Marathi' }, { code: 'gu', name: 'Gujarati' }, { code: 'ta', name: 'Tamil' },
-    { code: 'ur', name: 'Urdu' }, { code: 'ar', name: 'Arabic' }
+    { code: 'ur', name: 'Urdu' }
   ];
 
-  const t = uiLabels[lang] || uiLabels['en'];
-
-  const searchBooks = async (e) => {
+  const searchContent = async (e) => {
     if (e) e.preventDefault();
-    if (!query) return;
     setLoading(true);
     try {
-      const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&langRestrict=${lang}&maxResults=20`);
+      const searchQuery = genre === 'All' ? query : `${query} subject:${genre}`;
+      const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${searchQuery || 'trending'}&langRestrict=${lang}&maxResults=20`);
       const data = await res.json();
       setBooks(data.items || []);
     } catch (err) { console.error(err); } finally { setLoading(false); }
   };
 
+  // Initial load
+  useEffect(() => { searchContent(); }, [genre, lang]);
+
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#efebe1', color: '#333', fontFamily: '"Lucida Grande",Verdana,Geneva,Helvetica,Arial,sans-serif' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0f0f0f', color: '#fff', fontFamily: 'Helvetica, Arial, sans-serif' }}>
       
-      {/* Top Bar like Open Library */}
-      <header style={{ backgroundColor: '#fff', borderBottom: '1px solid #ccc', padding: '10px 20px' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '15px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-             <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: 0, color: '#000' }}>BRIGHTWAY <span style={{color: '#2563eb'}}>LIBRARY</span></h1>
-          </div>
-          
-          <form onSubmit={searchBooks} style={{ display: 'flex', flex: 1, maxWidth: '600px', border: '1px solid #ccc', borderRadius: '4px', overflow: 'hidden' }}>
-            <select value={lang} onChange={(e) => setLang(e.target.value)} style={{ padding: '8px', border: 'none', background: '#f9f9f9', borderRight: '1px solid #ccc', cursor: 'pointer', outline: 'none' }}>
-              {languages.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
-            </select>
-            <input 
-              type="text" placeholder={t.placeholder} value={query} onChange={(e) => setQuery(e.target.value)}
-              style={{ padding: '10px', flex: 1, border: 'none', outline: 'none' }}
-            />
-            <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#f9f9f9', border: 'none', cursor: 'pointer', borderLeft: '1px solid #ccc' }}>🔍</button>
-          </form>
-
-          <div style={{ display: 'flex', gap: '10px' }}>
-             <button style={{ padding: '8px 15px', backgroundColor: '#0074b1', color: '#fff', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Sign Up</button>
-          </div>
+      {/* Movie-Style Navbar */}
+      <nav style={{ padding: '20px 5%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.8)', position: 'sticky', top: 0, zIndex: 100 }}>
+        <h1 style={{ color: '#E50914', fontSize: '28px', fontWeight: 'bold', margin: 0 }}>BRIGHTWAY <span style={{color:'#fff'}}>LIBRARY</span></h1>
+        
+        <div style={{ display: 'flex', gap: '20px', fontWeight: 'bold' }}>
+          <span onClick={() => setContentType('books')} style={{ cursor: 'pointer', color: contentType === 'books' ? '#E50914' : '#fff' }}>Books</span>
+          <span onClick={() => setContentType('news')} style={{ cursor: 'pointer', color: contentType === 'news' ? '#E50914' : '#fff' }}>Newspapers</span>
         </div>
-      </header>
 
-      {/* Hero Section */}
-      <div style={{ backgroundColor: '#fff', padding: '40px 20px', borderBottom: '1px solid #ccc' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'left' }}>
-           <h2 style={{ fontSize: '18px', color: '#0074b1', margin: '0 0 10px 0' }}>{t.banner}</h2>
-           <div style={{ backgroundColor: '#f9f9f9', padding: '20px', borderRadius: '8px', border: '1px solid #eee', maxWidth: '400px' }}>
-              <h3 style={{ margin: '0 0 10px 0', fontSize: '16px' }}>Read Free Library Books Online</h3>
-              <p style={{ fontSize: '14px', color: '#666' }}>Millions of books available through Brightway Digital Lending.</p>
-           </div>
-        </div>
-      </div>
+        <form onSubmit={searchContent} style={{ display: 'flex', background: '#333', borderRadius: '4px', overflow: 'hidden' }}>
+          <input 
+            type="text" placeholder="Search title..." value={query} onChange={(e) => setQuery(e.target.value)}
+            style={{ padding: '8px 15px', border: 'none', background: 'transparent', color: '#fff', outline: 'none' }}
+          />
+          <button style={{ padding: '8px 15px', background: 'transparent', border: 'none', cursor: 'pointer' }}>🔍</button>
+        </form>
+      </nav>
 
-      {/* Book Grid */}
-      <main style={{ maxWidth: '1200px', margin: '40px auto', padding: '0 20px' }}>
-        <h3 style={{ borderBottom: '2px solid #ccc', paddingBottom: '10px', marginBottom: '20px' }}>Search Results</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '30px' }}>
-          {books.map((book) => (
-            <div key={book.id} style={{ textAlign: 'center' }}>
-              <div style={{ boxShadow: '0 4px 8px rgba(0,0,0,0.1)', borderRadius: '4px', overflow: 'hidden', marginBottom: '10px', backgroundColor: '#fff' }}>
-                <img src={book.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || 'https://via.placeholder.com/150'} style={{ width: '100%', aspectRatio: '2/3', objectFit: 'cover' }} alt="cover" />
-              </div>
-              <h4 style={{ fontSize: '14px', margin: '5px 0', height: '35px', overflow: 'hidden', fontWeight: 'bold' }}>{book.volumeInfo.title}</h4>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <button onClick={() => { setActiveBook(book); setModalType('read'); }} style={{ padding: '8px', backgroundColor: '#0074b1', color: '#fff', border: 'none', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
-                  {t.readBtn}
-                </button>
-                <button onClick={() => { setActiveBook(book); setModalType('points'); }} style={{ padding: '6px', backgroundColor: '#f0f0f0', border: '1px solid #ccc', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}>
-                  {t.insightBtn}
-                </button>
-                <div style={{display: 'flex', gap: '5px'}}>
-                   <a href={book.accessInfo?.pdf?.downloadLink || `https://www.google.com/search?q=${encodeURIComponent(book.volumeInfo.title + " filetype:pdf")}`} target="_blank" style={{ flex: 1, textDecoration: 'none', backgroundColor: '#eee', color: '#333', padding: '5px', borderRadius: '4px', fontSize: '10px', border: '1px solid #ccc', textAlign: 'center' }}>{t.downloadBtn}</a>
-                   <a href={`https://www.amazon.com/s?k=${encodeURIComponent(book.volumeInfo.title)}`} target="_blank" style={{ flex: 1, textDecoration: 'none', backgroundColor: '#eee', color: '#333', padding: '5px', borderRadius: '4px', fontSize: '10px', border: '1px solid #ccc', textAlign: 'center' }}>{t.buyBtn}</a>
-                </div>
-              </div>
-            </div>
+      {/* Genre Selector (Like Movie Categories) */}
+      {contentType === 'books' && (
+        <div style={{ padding: '20px 5%', display: 'flex', gap: '10px', overflowX: 'auto', whiteSpace: 'nowrap' }}>
+          {genres.map(g => (
+            <button 
+              key={g} onClick={() => setGenre(g)}
+              style={{ padding: '8px 20px', borderRadius: '20px', border: '1px solid #444', background: genre === g ? '#fff' : '#000', color: genre === g ? '#000' : '#fff', cursor: 'pointer', fontWeight: 'bold' }}
+            >
+              {g}
+            </button>
           ))}
         </div>
+      )}
+
+      {/* Content Sections */}
+      <main style={{ padding: '20px 5%' }}>
+        {contentType === 'books' ? (
+          <>
+            <h2 style={{ fontSize: '22px', marginBottom: '20px' }}>{genre} Books for You</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '25px' }}>
+              {books.map((book) => (
+                <div key={book.id} style={{ transition: 'transform 0.3s', cursor: 'pointer' }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                  <img 
+                    src={book.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || 'https://via.placeholder.com/150'} 
+                    style={{ width: '100%', borderRadius: '8px', boxShadow: '0 10px 20px rgba(0,0,0,0.5)' }} 
+                    alt="cover" 
+                  />
+                  <h4 style={{ fontSize: '14px', marginTop: '10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{book.volumeInfo.title}</h4>
+                  <div style={{ display: 'flex', gap: '5px', marginTop: '5px' }}>
+                    <button onClick={() => { setActiveBook(book); setModalType('points'); }} style={{ flex: 1, fontSize: '10px', padding: '5px', background: '#E50914', color: '#fff', border: 'none', borderRadius: '3px', fontWeight: 'bold' }}>DNA</button>
+                    <button onClick={() => { setActiveBook(book); setModalType('read'); }} style={{ flex: 1, fontSize: '10px', padding: '5px', background: '#fff', color: '#000', border: 'none', borderRadius: '3px', fontWeight: 'bold' }}>READ</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <>
+            <h2 style={{ fontSize: '22px', marginBottom: '20px' }}>World's Leading Newspapers</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+              {newspapers.map((paper) => (
+                <div key={paper.id} style={{ background: '#1a1a1a', padding: '20px', borderRadius: '10px', border: '1px solid #333' }}>
+                  <div style={{ fontSize: '40px', marginBottom: '10px' }}>{paper.logo}</div>
+                  <h3 style={{ margin: '0 0 5px 0' }}>{paper.title}</h3>
+                  <p style={{ fontSize: '12px', color: '#aaa', margin: '0 0 15px 0' }}>Editor: <strong>{paper.editor}</strong></p>
+                  <a href={paper.link} target="_blank" style={{ display: 'block', textAlign: 'center', padding: '10px', background: '#fff', color: '#000', textDecoration: 'none', borderRadius: '5px', fontWeight: 'bold' }}>READ TODAY'S EDITION</a>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </main>
 
-      {/* Modal Section */}
+      {/* Movie-Style Modal */}
       {activeBook && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
-          <div style={{ backgroundColor: '#fff', width: '100%', maxWidth: '900px', height: '85vh', borderRadius: '8px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ padding: '15px 20px', borderBottom: '1px solid #ccc', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f9f9f9' }}>
-              <h2 style={{ fontSize: '18px', margin: 0 }}>{activeBook.volumeInfo.title}</h2>
-              <button onClick={() => { setActiveBook(null); setModalType(null); }} style={{ padding: '5px 15px', cursor: 'pointer' }}>{t.close}</button>
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.9)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <div style={{ backgroundColor: '#181818', width: '90%', maxWidth: '800px', borderRadius: '10px', overflow: 'hidden' }}>
+            <div style={{ padding: '20px', borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between' }}>
+              <h2 style={{ margin: 0 }}>{activeBook.volumeInfo.title}</h2>
+              <button onClick={() => { setActiveBook(null); setModalType(null); }} style={{ background: 'none', color: '#fff', border: 'none', fontSize: '20px', cursor: 'pointer' }}>✕</button>
             </div>
-            <div style={{ flex: 1, padding: '20px', overflowY: 'auto' }}>
+            <div style={{ padding: '30px', maxHeight: '70vh', overflowY: 'auto' }}>
               {modalType === 'read' ? (
-                <iframe src={`https://books.google.com/books?id=${activeBook.id}&printsec=frontcover&output=embed`} style={{ width: '100%', height: '100%', border: 'none' }} />
+                <iframe src={`https://books.google.com/books?id=${activeBook.id}&printsec=frontcover&output=embed`} style={{ width: '100%', height: '500px', border: 'none' }} />
               ) : (
-                <div style={{ padding: '10px' }}>
-                  <h3 style={{color: '#0074b1'}}>Book DNA (Key Points)</h3>
-                  <p style={{lineHeight: '1.6'}}>{activeBook.volumeInfo.description?.replace(/<\/?[^>]+(>|$)/g, "") || "No description available."}</p>
+                <div>
+                  <h3 style={{color: '#E50914'}}>Book Insights</h3>
+                  <p style={{ lineHeight: '1.8', fontSize: '16px' }}>{activeBook.volumeInfo.description?.replace(/<\/?[^>]+(>|$)/g, "") || "Summary loading..."}</p>
                 </div>
               )}
             </div>

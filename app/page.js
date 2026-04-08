@@ -37,7 +37,7 @@ export default function Library() {
           BRIGHTWAY <span className="text-blue-600">LIBRARY</span>
         </h1>
         
-        <form onSubmit={searchBooks} className="flex flex-col md:flex-row gap-3 mt-8 bg-gray-100 p-3 rounded-3xl shadow-inner">
+        <form onSubmit={searchBooks} className="flex flex-col md:flex-row gap-3 mt-8 bg-gray-100 p-3 rounded-3xl shadow-inner border border-gray-200">
           <select 
             value={lang} 
             onChange={(e) => setLang(e.target.value)}
@@ -54,62 +54,57 @@ export default function Library() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          <button type="submit" className="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black shadow-lg">
+          <button type="submit" className="bg-blue-600 hover:bg-black text-white px-10 py-4 rounded-2xl font-black transition-all shadow-lg">
             {loading ? '...' : 'SEARCH'}
           </button>
         </form>
       </header>
 
       <main className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        {books.map((book) => (
-          <div key={book.id} className="bg-white border border-gray-100 rounded-3xl p-4 shadow-sm">
-            <div className="aspect-[3/4] mb-4 overflow-hidden rounded-2xl">
-              <img 
-                src={book.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || 'https://via.placeholder.com/150'} 
-                className="w-full h-full object-cover"
-                alt="book cover"
-              />
-            </div>
-            <h2 className="font-bold text-lg line-clamp-1">{book.volumeInfo.title}</h2>
-            
-            <div className="mt-4 space-y-2">
-              {/* Force Open in New Tab */}
-              <button 
-                onClick={() => setSelectedBook(book.id)}
-                className="w-full bg-blue-600 text-white text-xs py-3 rounded-xl font-bold"
-              >
-                READ FIRST CHAPTER
-              </button>
+        {books.map((book) => {
+          const previewUrl = book.volumeInfo.previewLink;
+          return (
+            <div key={book.id} className="bg-white border border-gray-100 rounded-3xl p-4 shadow-sm hover:shadow-xl transition-shadow flex flex-col justify-between">
+              <div>
+                <div className="aspect-[3/4] mb-4 overflow-hidden rounded-2xl bg-gray-50">
+                  <img 
+                    src={book.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || 'https://via.placeholder.com/150'} 
+                    className="w-full h-full object-cover"
+                    alt="book cover"
+                  />
+                </div>
+                <h2 className="font-bold text-lg line-clamp-2">{book.volumeInfo.title}</h2>
+                <p className="text-blue-500 text-sm mb-4 italic">{book.volumeInfo.authors?.[0] || 'Unknown Author'}</p>
+              </div>
               
-              <a 
-                href={`https://www.amazon.com/s?k=${encodeURIComponent(book.volumeInfo.title)}`} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="block text-center bg-yellow-400 text-black text-xs py-3 rounded-xl font-bold shadow-sm"
-              >
-                BUY ON AMAZON 🛒
-              </a>
+              <div className="mt-auto space-y-2">
+                {/* Ab yeh direct preview link kholega naye tab mein */}
+                <a 
+                  href={previewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-center bg-blue-600 text-white text-xs py-4 rounded-xl font-bold hover:bg-black transition-colors"
+                >
+                  READ FIRST CHAPTER 📖
+                </a>
+                
+                <a 
+                  href={`https://www.amazon.com/s?k=${encodeURIComponent(book.volumeInfo.title)}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block text-center bg-yellow-400 text-black text-xs py-4 rounded-xl font-bold hover:bg-yellow-500 transition-colors"
+                >
+                  BUY ON AMAZON 🛒
+                </a>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </main>
 
-      {/* Reader Modal */}
-      {selectedBook && (
-        <div className="fixed inset-0 bg-black/95 z-[9999] p-4 flex flex-col">
-          <button 
-            onClick={() => setSelectedBook(null)}
-            className="self-end text-white text-5xl p-4"
-          >
-            &times;
-          </button>
-          <div className="flex-1 bg-white rounded-t-3xl overflow-hidden shadow-2xl">
-            <iframe 
-              src={`https://books.google.com/books?id=${selectedBook}&printsec=frontcover&output=embed`} 
-              className="w-full h-full border-none"
-              title="reader"
-            />
-          </div>
+      {books.length === 0 && !loading && (
+        <div className="text-center mt-20 text-gray-300 font-bold text-xl uppercase tracking-widest">
+          Type something to explore the library
         </div>
       )}
     </div>

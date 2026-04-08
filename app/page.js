@@ -113,13 +113,55 @@ export default function Library() {
                   {activeBook.volumeInfo.description?.replace(/<\/?[^>]+(>|$)/g, "") || "Summary not available."}
                 </p>
               )}
-              {modalType === 'points' && (
-                <ul style={{ paddingLeft: '20px' }}>
-                  {(activeBook.volumeInfo.description?.split('. ').slice(0, 5) || ["Points not found"]).map((pt, i) => (
-                    <li key={i} style={{ marginBottom: '15px', color: '#1f2937' }}><strong>0{i+1}.</strong> {pt.replace(/<\/?[^>]+(>|$)/g, "")}</li>
-                  ))}
-                </ul>
-              )}
+             {modalType === 'points' && (
+  <div style={{ padding: '10px' }}>
+    <h3 style={{ fontSize: '22px', fontWeight: 'bold', color: '#2563eb', marginBottom: '20px', borderLeft: '5px solid #2563eb', paddingLeft: '15px' }}>
+      Executive Book Insights
+    </h3>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+      {(activeBook.volumeInfo.description 
+        ? activeBook.volumeInfo.description
+            .replace(/<\/?[^>]+(>|$)/g, "") // HTML tags hatane ke liye
+            .split(/[.!?]+\s+/) // Har sentence ko alag karne ke liye
+            .filter(sentence => sentence.length > 20) // Sirf bade aur kaam ke sentences lene ke liye
+            .slice(0, 10) // Top 10 points tak limit
+        : ["Humne is book ke insights dhoondhne ki koshish ki, magar publisher ne detailed description provide nahi ki hai."]
+      ).map((point, i) => (
+        <div key={i} style={{ 
+          display: 'flex', 
+          gap: '15px', 
+          backgroundColor: '#f8fafc', 
+          padding: '15px', 
+          borderRadius: '12px', 
+          border: '1px solid #e2e8f0',
+          alignItems: 'start'
+        }}>
+          <span style={{ 
+            backgroundColor: '#2563eb', 
+            color: '#fff', 
+            minWidth: '28px', 
+            height: '28px', 
+            borderRadius: '50%', 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            fontSize: '12px', 
+            fontWeight: 'bold' 
+          }}>
+            {i + 1}
+          </span>
+          <p style={{ margin: 0, fontSize: '15px', lineHeight: '1.5', color: '#1e293b', fontWeight: '500' }}>
+            {point.trim()}.
+          </p>
+        </div>
+      ))}
+    </div>
+    
+    <div style={{ marginTop: '30px', padding: '15px', backgroundColor: '#eff6ff', borderRadius: '10px', fontSize: '13px', color: '#1e40af', textAlign: 'center' }}>
+      💡 <strong>Pro Tip:</strong> Ye points book ke core ideas ko summarize karte hain taaki aap jaldi seekh sakein.
+    </div>
+  </div>
+)}
             </div>
           </div>
         </div>

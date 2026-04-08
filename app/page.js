@@ -7,19 +7,34 @@ export default function Library() {
   const [books, setBooks] = useState([]);
   const [lang, setLang] = useState('en');
   const [activeBook, setActiveBook] = useState(null);
-  const [modalType, setModalType] = useState(null); // 'dna' or 'read'
+  const [modalType, setModalType] = useState(null);
   const [contentType, setContentType] = useState('books');
 
+  const genres = ['Bestsellers', 'Fiction', 'Business', 'Technology', 'Science', 'History', 'Self-Help'];
+  
+  const allLanguages = [
+    { group: "Global", langs: [
+      { code: 'en', name: 'English 🇺🇸' }, { code: 'hi', name: 'Hindi 🇮🇳' }, 
+      { code: 'fr', name: 'French 🇫🇷' }, { code: 'es', name: 'Spanish 🇪🇸' }, 
+      { code: 'ja', name: 'Japanese 🇯🇵' }, { code: 'ar', name: 'Arabic 🇸🇦' }
+    ]},
+    { group: "Indian", langs: [
+      { code: 'pa', name: 'Punjabi 🇮🇳' }, { code: 'mr', name: 'Marathi 🇮🇳' }, 
+      { code: 'bn', name: 'Bengali 🇮🇳' }, { code: 'ta', name: 'Tamil 🇮🇳' }
+    ]}
+  ];
+
   const getBookDNA = (book) => {
-    const desc = book.volumeInfo.description?.replace(/<\/?[^>]+(>|$)/g, "") || "Analyzing deep insights... Knowledge DNA is being extracted.";
-    const points = desc.split(/[.!?]+\s+/).filter(s => s.length > 30).slice(0, 4);
-    const labels = ["🎯 Core Point", "🚀 Strategy", "⚠️ Warning", "💎 Wisdom"];
-    return points.map((p, i) => ({ label: labels[i], text: p }));
+    const desc = book.volumeInfo.description?.replace(/<\/?[^>]+(>|$)/g, "") || "Detailed knowledge extraction in progress...";
+    const points = desc.split(/[.!?]+\s+/).filter(s => s.length > 35).slice(0, 4);
+    const labels = ["🎯 Core Logic", "🚀 Action Plan", "⚠️ Common Pitfall", "💎 Master Wisdom"];
+    return points.map((p, i) => ({ label: labels[i] || "Insight", text: p }));
   };
 
-  const searchContent = async () => {
+  const searchContent = async (genreQuery = '') => {
+    const finalQuery = genreQuery || query || 'trending';
     try {
-      const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${query || 'bestseller'}&langRestrict=${lang}&maxResults=15`);
+      const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${finalQuery}&langRestrict=${lang}&maxResults=20`);
       const data = await res.json();
       setBooks(data.items || []);
     } catch (err) { console.error(err); }
@@ -28,33 +43,56 @@ export default function Library() {
   useEffect(() => { if(contentType === 'books') searchContent(); }, [lang, contentType]);
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0f0f10', color: '#f5ebe0' }}>
-      {/* Navbar */}
-      <nav style={{ padding: '20px 5%', background: '#261a14', borderBottom: '6px solid #d4a373', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 style={{ color: '#d4a373', margin: 0 }}>BRIGHTWAY LIBRARY</h1>
-        <div style={{ display: 'flex', background: '#1a120b', borderRadius: '30px', padding: '5px' }}>
-          <button onClick={() => setContentType('books')} style={{ padding: '8px 20px', borderRadius: '25px', border: 'none', background: contentType === 'books' ? '#d4a373' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}>BOOKS</button>
-          <button onClick={() => setContentType('news')} style={{ padding: '8px 20px', borderRadius: '25px', border: 'none', background: contentType === 'news' ? '#d4a373' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}>NEWS</button>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0f0f10', color: '#f5ebe0', fontFamily: 'serif' }}>
+      
+      {/* Smart Navbar */}
+      <nav style={{ padding: '20px 5%', background: '#261a14', borderBottom: '5px solid #d4a373', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+        <h1 style={{ color: '#d4a373', margin: 0, fontSize: '24px', letterSpacing: '1px' }}>BRIGHTWAY <span style={{color:'#fff'}}>LIBRARY</span></h1>
+        
+        <div style={{ display: 'flex', background: '#1a120b', borderRadius: '30px', padding: '5px', border: '1px solid #3c2a21' }}>
+          <button onClick={() => setContentType('books')} style={{ padding: '10px 25px', borderRadius: '25px', border: 'none', background: contentType === 'books' ? '#d4a373' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}>📚 BOOKS</button>
+          <button onClick={() => setContentType('news')} style={{ padding: '10px 25px', borderRadius: '25px', border: 'none', background: contentType === 'news' ? '#d4a373' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}>📰 NEWS</button>
         </div>
+
+        <select value={lang} onChange={(e) => setLang(e.target.value)} style={{ background: '#1a120b', color: '#fff', border: '1px solid #d4a373', padding: '8px', borderRadius: '8px' }}>
+          {allLanguages.map(g => (
+            <optgroup label={g.group} key={g.group}>{g.langs.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}</optgroup>
+          ))}
+        </select>
       </nav>
 
-      <main style={{ padding: '40px 5%' }}>
+      <main style={{ padding: '30px 5%' }}>
         {contentType === 'books' ? (
           <div>
-            <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-              <input type="text" placeholder="Search Book DNA..." value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && searchContent()}
-                style={{ width: '300px', padding: '12px', borderRadius: '25px 0 0 25px', border: '1px solid #d4a373', background: '#261a14', color: '#fff' }} />
-              <button onClick={searchContent} style={{ padding: '12px 25px', borderRadius: '0 25px 25px 0', border: 'none', background: '#d4a373', fontWeight: 'bold', cursor: 'pointer' }}>SEARCH</button>
+            {/* Genre & Search Section */}
+            <div style={{ marginBottom: '40px', textAlign: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '25px' }}>
+                {genres.map(g => (
+                  <button key={g} onClick={() => searchContent(g)} style={{ padding: '8px 15px', borderRadius: '20px', border: '1px solid #3c2a21', background: '#261a14', color: '#d4a373', cursor: 'pointer', fontSize: '13px' }}>{g}</button>
+                ))}
+              </div>
+              <div style={{ display: 'inline-flex', background: '#261a14', borderRadius: '30px', padding: '5px', border: '1px solid #d4a373' }}>
+                <input type="text" placeholder="Search Masterpieces..." value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && searchContent()}
+                  style={{ background: 'transparent', border: 'none', color: '#fff', padding: '10px 20px', outline: 'none', width: '250px' }} />
+                <button onClick={() => searchContent()} style={{ background: '#d4a373', border: 'none', borderRadius: '25px', padding: '10px 25px', fontWeight: 'bold', cursor: 'pointer' }}>SEARCH</button>
+              </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '50px' }}>
+            {/* Book Shelf */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '50px 30px' }}>
               {books.map(book => (
-                <div key={book.id} style={{ textAlign: 'center' }}>
-                  <img src={book.volumeInfo.imageLinks?.thumbnail} style={{ width: '100%', borderRadius: '10px', boxShadow: '10px 10px 20px rgba(0,0,0,0.5)' }} />
-                  <h4 style={{ fontSize: '14px', margin: '15px 0' }}>{book.volumeInfo.title}</h4>
-                  <div style={{ display: 'flex', gap: '5px', justifyContent: 'center' }}>
-                    <button onClick={() => { setActiveBook(book); setModalType('dna'); }} style={{ padding: '8px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '10px' }}>AI DNA</button>
-                    <button onClick={() => { setActiveBook(book); setModalType('read'); }} style={{ padding: '8px', background: '#fff', color: '#000', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '10px' }}>READ</button>
+                <div key={book.id} style={{ textAlign: 'center', transition: '0.3s' }}>
+                  <div style={{ width: '100%', aspectRatio: '2/3', position: 'relative', boxShadow: '0 15px 35px rgba(0,0,0,0.7)', borderRadius: '2px 10px 10px 2px', overflow: 'hidden', borderLeft: '5px solid #333' }}>
+                    <img src={book.volumeInfo.imageLinks?.thumbnail} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                  <h4 style={{ fontSize: '15px', margin: '15px 0 10px', height: '40px', overflow: 'hidden' }}>{book.volumeInfo.title}</h4>
+                  
+                  {/* Action Grid */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
+                    <button onClick={() => { setActiveBook(book); setModalType('dna'); }} style={{ padding: '10px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '11px' }}>✨ AI DNA</button>
+                    <button onClick={() => { setActiveBook(book); setModalType('read'); }} style={{ padding: '10px', background: '#fff', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '11px' }}>📖 READ</button>
+                    <a href={`https://www.amazon.in/s?k=${encodeURIComponent(book.volumeInfo.title)}`} target="_blank" style={{ textDecoration: 'none', padding: '10px', background: '#ff9900', color: '#000', borderRadius: '5px', fontWeight: 'bold', fontSize: '11px' }}>🛒 BUY</a>
+                    <a href={`https://www.google.com/search?q=${encodeURIComponent(book.volumeInfo.title + " filetype:pdf")}`} target="_blank" style={{ textDecoration: 'none', padding: '10px', background: '#10b981', color: '#fff', borderRadius: '5px', fontWeight: 'bold', fontSize: '11px' }}>📄 PDF</a>
                   </div>
                 </div>
               ))}
@@ -67,23 +105,27 @@ export default function Library() {
 
       {/* Feature Modal */}
       {activeBook && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', zIndex: 999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
-          <div style={{ background: '#fff', color: '#000', width: '100%', maxWidth: '800px', borderRadius: '15px', padding: '25px', maxHeight: '85vh', overflowY: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <h3>{activeBook.volumeInfo.title}</h3>
-              <button onClick={() => setActiveBook(null)} style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '5px 15px', borderRadius: '5px', cursor: 'pointer' }}>CLOSE</button>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.96)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
+          <div style={{ background: '#fff', color: '#000', width: '100%', maxWidth: '850px', height: '85vh', borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '20px', background: '#f8f9fa', borderBottom: '1px solid #ddd', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ fontSize: '18px', margin: 0 }}>{activeBook.volumeInfo.title}</h2>
+              <button onClick={() => { setActiveBook(null); setModalType(null); }} style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '8px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>✕ CLOSE</button>
             </div>
-            {modalType === 'dna' ? (
-              <div>
-                {getBookDNA(activeBook).map((item, i) => (
-                  <div key={i} style={{ padding: '15px', background: '#f0f7ff', marginBottom: '10px', borderLeft: '5px solid #3b82f6' }}>
-                    <strong>{item.label}:</strong> {item.text}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <iframe src={`https://books.google.com/books?id=${activeBook.id}&printsec=frontcover&output=embed`} style={{ width: '100%', height: '500px', border: 'none' }} />
-            )}
+            <div style={{ flex: 1, padding: '30px', overflowY: 'auto' }}>
+              {modalType === 'dna' ? (
+                <div style={{ display: 'grid', gap: '20px' }}>
+                  <div style={{ textAlign: 'center', color: '#3b82f6', fontSize: '20px', fontWeight: 'bold' }}>💡 AI KNOWLEDGE EXTRACTION</div>
+                  {getBookDNA(activeBook).map((item, i) => (
+                    <div key={i} style={{ padding: '20px', background: '#f0f7ff', borderRadius: '12px', borderLeft: '6px solid #3b82f6' }}>
+                      <strong style={{ color: '#3b82f6', display: 'block', marginBottom: '5px' }}>{item.label}</strong>
+                      <p style={{ margin: 0, lineHeight: '1.6' }}>{item.text}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <iframe src={`https://books.google.com/books?id=${activeBook.id}&printsec=frontcover&output=embed`} style={{ width: '100%', height: '100%', border: 'none' }} />
+              )}
+            </div>
           </div>
         </div>
       )}

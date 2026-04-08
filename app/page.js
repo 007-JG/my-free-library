@@ -1,19 +1,30 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function Library() {
   const [query, setQuery] = useState('');
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [lang, setLang] = useState('en'); // Default English
+  const [selectedBook, setSelectedBook] = useState(null);
+
+  const languages = [
+    { code: 'en', name: 'English' },
+    { code: 'hi', name: 'Hindi' },
+    { code: 'es', name: 'Spanish' },
+    { code: 'fr', name: 'French' },
+    { code: 'ar', name: 'Arabic' }
+  ];
 
   const searchBooks = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!query) return;
     setLoading(true);
 
     try {
-      const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=12`);
+      // langRestrict filter add kiya hai language ke liye
+      const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}&langRestrict=${lang}&maxResults=12`);
       const data = await res.json();
       setBooks(data.items || []);
     } catch (err) {
@@ -24,79 +35,84 @@ export default function Library() {
   };
 
   return (
-    <div className="min-h-screen bg-white p-6">
-      {/* Header with New Name */}
-      <header className="max-w-4xl mx-auto text-center mb-12">
-        <h1 className="text-5xl font-black text-black mb-2 tracking-tight">
+    <div className="min-h-screen bg-white p-4 md:p-10 text-black font-sans">
+      {/* Header */}
+      <header className="max-w-5xl mx-auto text-center mb-12">
+        <h1 className="text-6xl font-black mb-4 tracking-tighter">
           BRIGHTWAY <span className="text-blue-600">LIBRARY</span>
         </h1>
-        <p className="text-gray-500 text-lg">Duniya ki har kitaab, ab aapki pohanch mein.</p>
         
-        <form onSubmit={searchBooks} className="mt-8 flex gap-2 p-2 bg-gray-100 rounded-2xl shadow-inner">
+        <form onSubmit={searchBooks} className="flex flex-col md:flex-row gap-3 mt-8 bg-gray-100 p-3 rounded-3xl shadow-inner">
+          <select 
+            value={lang} 
+            onChange={(e) => setLang(e.target.value)}
+            className="bg-white p-3 rounded-2xl border-none outline-none font-bold text-gray-700 cursor-pointer"
+          >
+            {languages.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
+          </select>
           <input 
             type="text" 
-            placeholder="Book, Author ya Topic search karein..." 
-            className="flex-1 p-4 bg-transparent border-none outline-none text-black text-lg"
+            placeholder="Search any book..." 
+            className="flex-1 p-4 bg-transparent outline-none text-xl"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          <button 
-            type="submit" 
-            className="bg-black hover:bg-gray-800 text-white px-8 py-4 rounded-xl font-bold transition-all shadow-lg"
-          >
-            {loading ? 'Searching...' : 'Dhoondein'}
+          <button type="submit" className="bg-blue-600 hover:bg-black text-white px-10 py-4 rounded-2xl font-black transition-all">
+            {loading ? '...' : 'SEARCH'}
           </button>
         </form>
       </header>
 
-      {/* Results Section */}
-      <main className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
+      {/* Results */}
+      <main className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {books.map((book) => (
-          <div key={book.id} className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-300">
-            <div className="aspect-[2/3] overflow-hidden bg-gray-200">
-              {book.volumeInfo.imageLinks?.thumbnail ? (
-                <img 
-                  src={book.volumeInfo.imageLinks.thumbnail.replace('http:', 'https:')} 
-                  alt={book.volumeInfo.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400 italic">No Cover</div>
-              )}
+          <div key={book.id} className="group bg-white border border-gray-100 rounded-3xl p-4 hover:shadow-2xl transition-all">
+            <div className="relative aspect-[3/4] mb-4 overflow-hidden rounded-2xl shadow-md">
+              <img 
+                src={book.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || 'https://via.placeholder.com/150'} 
+                className="w-full h-full object-cover transition-transform group-hover:scale-110"
+              />
+              <button 
+                onClick={() => setSelectedBook(book.id)}
+                className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-bold transition-all"
+              >
+                READ PREVIEW 📖
+              </button>
             </div>
-            
-            <div className="p-5">
-              <h2 className="text-lg font-bold text-gray-900 line-clamp-1 mb-1">{book.volumeInfo.title}</h2>
-              <p className="text-sm text-blue-600 font-medium mb-3 line-clamp-1">{book.volumeInfo.authors?.join(', ') || 'Unknown Author'}</p>
-              <p className="text-gray-500 text-xs line-clamp-3 mb-5 leading-relaxed">
-                {book.volumeInfo.description || "Is book ki summary filhal available nahi hai."}
-              </p>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <a 
-                  href={book.volumeInfo.infoLink} 
-                  target="_blank" 
-                  className="text-center bg-gray-50 hover:bg-gray-100 text-gray-900 py-2.5 rounded-lg text-xs font-bold border border-gray-200 transition"
-                >
-                  Details
-                </a>
-                <a 
-                  href={`https://www.amazon.com/s?k=${book.volumeInfo.title}`} 
-                  target="_blank" 
-                  className="text-center bg-yellow-400 hover:bg-yellow-500 text-black py-2.5 rounded-lg text-xs font-bold transition shadow-sm"
-                >
-                  Buy Now
-                </a>
-              </div>
+            <h2 className="font-bold text-lg line-clamp-1">{book.volumeInfo.title}</h2>
+            <p className="text-blue-600 text-sm mb-4">{book.volumeInfo.authors?.[0]}</p>
+            <div className="flex gap-2">
+               <button 
+                onClick={() => setSelectedBook(book.id)}
+                className="flex-1 bg-gray-900 text-white text-xs py-3 rounded-xl font-bold"
+               >
+                 READ NOW
+               </button>
+               <a href={`https://www.amazon.com/s?k=${book.volumeInfo.title}`} target="_blank" className="bg-yellow-400 p-3 rounded-xl text-xs font-bold">🛒</a>
             </div>
           </div>
         ))}
       </main>
 
-      {books.length === 0 && !loading && (
-        <div className="flex flex-col items-center justify-center mt-20 opacity-20">
-          <div className="text-8xl mb-4">📚</div>
-          <p className="text-2xl font-bold">Brightway Library mein aapka swagat hai</p>
+      {/* Preview Modal (Reader Overlay) */}
+      {selectedBook && (
+        <div className="fixed inset-0 bg-black/90 z-50 p-4 flex flex-col items-center">
+          <button 
+            onClick={() => setSelectedBook(null)}
+            className="self-end text-white text-4xl mb-4 font-light hover:rotate-90 transition-all"
+          >
+            &times;
+          </button>
+          <div className="w-full max-w-5xl h-[80vh] bg-white rounded-3xl overflow-hidden shadow-2xl">
+            <iframe 
+              src={`https://books.google.com/books?id=${selectedBook}&lpg=PP1&pg=PP1&output=embed`} 
+              className="w-full h-full border-none"
+              title="Book Preview"
+            />
+          </div>
+          <p className="text-gray-400 mt-4 italic text-sm text-center">
+            Note: Google provides limited preview for free. Full access depends on book availability.
+          </p>
         </div>
       )}
     </div>

@@ -1,5 +1,5 @@
 "use client";
-
+import Newsstand from './components/Newsstand';
 import React, { useState, useEffect } from 'react';
 
 export default function Library() {

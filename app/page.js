@@ -47,7 +47,10 @@ export default function Library() {
       
       {/* Smart Navbar */}
       <nav style={{ padding: '20px 5%', background: '#261a14', borderBottom: '5px solid #d4a373', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
-        <h1 style={{ color: '#d4a373', margin: 0, fontSize: '24px', letterSpacing: '1px' }}>BRIGHTWAY <span style={{color:'#fff'}}>LIBRARY</span></h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '30px' }}>📖</span>
+          <h1 style={{ color: '#d4a373', margin: 0, fontSize: '24px', letterSpacing: '1px' }}>BRIGHTWAY <span style={{color:'#fff'}}>LIBRARY</span></h1>
+        </div>
         
         <div style={{ display: 'flex', background: '#1a120b', borderRadius: '30px', padding: '5px', border: '1px solid #3c2a21' }}>
           <button onClick={() => setContentType('books')} style={{ padding: '10px 25px', borderRadius: '25px', border: 'none', background: contentType === 'books' ? '#d4a373' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}>📚 BOOKS</button>
@@ -64,7 +67,6 @@ export default function Library() {
       <main style={{ padding: '30px 5%' }}>
         {contentType === 'books' ? (
           <div>
-            {/* Genre & Search Section */}
             <div style={{ marginBottom: '40px', textAlign: 'center' }}>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '25px' }}>
                 {genres.map(g => (
@@ -76,23 +78,25 @@ export default function Library() {
                   style={{ background: 'transparent', border: 'none', color: '#fff', padding: '10px 20px', outline: 'none', width: '250px' }} />
                 <button onClick={() => searchContent()} style={{ background: '#d4a373', border: 'none', borderRadius: '25px', padding: '10px 25px', fontWeight: 'bold', cursor: 'pointer' }}>SEARCH</button>
               </div>
+
+              {/* NEW: SEO Keywords Section */}
+              <div style={{ marginTop: '20px', fontSize: '12px', color: '#666', fontStyle: 'italic' }}>
+                Trending: Free AI Book DNA • Digital Newsstand • Hindi & English E-Papers • Global Knowledge Hub
+              </div>
             </div>
 
-            {/* Book Shelf */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '50px 30px' }}>
               {books.map(book => (
-                <div key={book.id} style={{ textAlign: 'center', transition: '0.3s' }}>
+                <div key={book.id} style={{ textAlign: 'center' }}>
                   <div style={{ width: '100%', aspectRatio: '2/3', position: 'relative', boxShadow: '0 15px 35px rgba(0,0,0,0.7)', borderRadius: '2px 10px 10px 2px', overflow: 'hidden', borderLeft: '5px solid #333' }}>
-                    <img src={book.volumeInfo.imageLinks?.thumbnail} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={book.volumeInfo.imageLinks?.thumbnail || 'https://via.placeholder.com/150'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                   <h4 style={{ fontSize: '15px', margin: '15px 0 10px', height: '40px', overflow: 'hidden' }}>{book.volumeInfo.title}</h4>
-                  
-                  {/* Action Grid */}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
                     <button onClick={() => { setActiveBook(book); setModalType('dna'); }} style={{ padding: '10px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '11px' }}>✨ AI DNA</button>
                     <button onClick={() => { setActiveBook(book); setModalType('read'); }} style={{ padding: '10px', background: '#fff', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '11px' }}>📖 READ</button>
-                    <a href={`https://www.amazon.in/s?k=${encodeURIComponent(book.volumeInfo.title)}`} target="_blank" style={{ textDecoration: 'none', padding: '10px', background: '#ff9900', color: '#000', borderRadius: '5px', fontWeight: 'bold', fontSize: '11px' }}>🛒 BUY</a>
-                    <a href={`https://www.google.com/search?q=${encodeURIComponent(book.volumeInfo.title + " filetype:pdf")}`} target="_blank" style={{ textDecoration: 'none', padding: '10px', background: '#10b981', color: '#fff', borderRadius: '5px', fontWeight: 'bold', fontSize: '11px' }}>📄 PDF</a>
+                    <a href={`https://www.amazon.in/s?k=${encodeURIComponent(book.volumeInfo.title)}`} target="_blank" style={{ textDecoration: 'none', padding: '10px', background: '#ff9900', color: '#000', borderRadius: '5px', fontWeight: 'bold', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🛒 BUY</a>
+                    <a href={`https://www.google.com/search?q=${encodeURIComponent(book.volumeInfo.title + " filetype:pdf")}`} target="_blank" style={{ textDecoration: 'none', padding: '10px', background: '#10b981', color: '#fff', borderRadius: '5px', fontWeight: 'bold', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📄 PDF</a>
                   </div>
                 </div>
               ))}
@@ -102,6 +106,31 @@ export default function Library() {
           <Newsstand />
         )}
       </main>
+
+      {/* NEW: Footer with About/Contact */}
+      <footer style={{ padding: '50px 5%', background: '#1a120b', borderTop: '1px solid #3c2a21', marginTop: '50px', textAlign: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px', marginBottom: '30px', textAlign: 'left' }}>
+          <div>
+            <h3 style={{ color: '#d4a373' }}>About The Brightway</h3>
+            <p style={{ fontSize: '14px', lineHeight: '1.6', color: '#aaa' }}>The Brightway is a next-generation digital library providing AI-powered book insights and a global newsstand. Our mission is to make knowledge accessible and fast for everyone.</p>
+          </div>
+          <div>
+            <h3 style={{ color: '#d4a373' }}>Quick Links</h3>
+            <ul style={{ listStyle: 'none', padding: 0, fontSize: '14px', color: '#aaa' }}>
+              <li style={{ marginBottom: '10px' }}>✓ AI Knowledge Extraction</li>
+              <li style={{ marginBottom: '10px' }}>✓ International Newspapers</li>
+              <li style={{ marginBottom: '10px' }}>✓ Digital Reading Room</li>
+            </ul>
+          </div>
+          <div>
+            <h3 style={{ color: '#d4a373' }}>Contact & Support</h3>
+            <p style={{ fontSize: '14px', color: '#aaa' }}>Found a bug or have a suggestion? Reach out to us at <strong>support@thebrightway.vercel.app</strong></p>
+          </div>
+        </div>
+        <div style={{ borderTop: '1px solid #261a14', paddingTop: '20px', fontSize: '12px', color: '#555' }}>
+          © 2026 THE BRIGHTWAY LIBRARY | ALL RIGHTS RESERVED
+        </div>
+      </footer>
 
       {/* Feature Modal */}
       {activeBook && (

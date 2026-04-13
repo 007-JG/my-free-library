@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import Newsstand from './components/Newsstand'; 
 
-// --- AD COMPONENT (Aapki ID ke saath) ---
+// --- AD COMPONENTS ---
+// 1. Standard Display Ad (Jo tune pehle diya tha)
 const AdSlot = ({ id }) => (
   <div style={{ margin: '20px auto', textAlign: 'center', background: '#261a14', padding: '15px', borderRadius: '10px', border: '1px solid #3c2a21', maxWidth: '1200px' }}>
     <span style={{ fontSize: '10px', color: '#d4a373', display: 'block', marginBottom: '8px', letterSpacing: '1px' }}>SPONSORED CONTENT</span>
@@ -12,6 +13,18 @@ const AdSlot = ({ id }) => (
          data-ad-slot={id}
          data-ad-format="auto"
          data-full-width-responsive="true"></ins>
+  </div>
+);
+
+// 2. Multiplex Ad (Naya waala jo tune abhi bheja)
+const MultiplexAd = () => (
+  <div style={{ margin: '30px auto', padding: '15px', background: '#1a120b', borderRadius: '12px', border: '1px solid #d4a373' }}>
+     <span style={{ fontSize: '10px', color: '#d4a373', display: 'block', marginBottom: '10px' }}>YOU MAY ALSO LIKE</span>
+     <ins className="adsbygoogle"
+          style={{ display: 'block' }}
+          data-ad-format="autorelaxed"
+          data-ad-client="ca-pub-6453585356934687"
+          data-ad-slot="6852328933"></ins>
   </div>
 );
 
@@ -77,7 +90,7 @@ export default function Library() {
 
   useEffect(() => { 
     if(contentType === 'books') searchContent(); 
-    // AdSense initialize
+    // Trigger Ads
     try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
   }, [lang, contentType]);
 
@@ -103,10 +116,9 @@ export default function Library() {
         </select>
       </nav>
 
-      {/* MAIN CONTENT */}
       <main style={{ padding: '30px 5%', position: 'relative', zIndex: 10 }}>
         
-        {/* TOP AD SLOT (Both for News & Books) */}
+        {/* TOP DISPLAY AD */}
         <AdSlot id="3870942373" />
 
         {contentType === 'books' ? (
@@ -114,95 +126,59 @@ export default function Library() {
             <div style={{ marginBottom: '40px', textAlign: 'center' }}>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '25px' }}>
                 {genres.map(g => (
-                  <button 
-                    key={g} 
-                    disabled={loading}
-                    onClick={() => searchContent(g)} 
-                    style={{ 
-                      padding: '8px 15px', 
-                      borderRadius: '20px', 
-                      border: '1px solid #3c2a21', 
-                      background: '#261a14', 
-                      color: '#d4a373', 
-                      cursor: loading ? 'not-allowed' : 'pointer', 
-                      fontSize: '13px',
-                      opacity: loading ? 0.6 : 1,
-                      transition: '0.3s'
-                    }}
-                  >
-                    {g}
-                  </button>
+                  <button key={g} disabled={loading} onClick={() => searchContent(g)} style={{ padding: '8px 15px', borderRadius: '20px', border: '1px solid #3c2a21', background: '#261a14', color: '#d4a373', cursor: loading ? 'not-allowed' : 'pointer', fontSize: '13px', opacity: loading ? 0.6 : 1, transition: '0.3s' }}>{g}</button>
                 ))}
               </div>
-              
               <div style={{ display: 'inline-flex', background: '#261a14', borderRadius: '30px', padding: '5px', border: '1px solid #d4a373' }}>
-                <input type="text" placeholder="Search Masterpieces..." value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && searchContent()}
-                  style={{ background: 'transparent', border: 'none', color: '#fff', padding: '10px 20px', outline: 'none', width: '250px' }} />
-                <button onClick={() => searchContent()} disabled={loading} style={{ background: '#d4a373', border: 'none', borderRadius: '25px', padding: '10px 25px', fontWeight: 'bold', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}>
-                  {loading ? '...' : 'SEARCH'}
-                </button>
+                <input type="text" placeholder="Search Masterpieces..." value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && searchContent()} style={{ background: 'transparent', border: 'none', color: '#fff', padding: '10px 20px', outline: 'none', width: '250px' }} />
+                <button onClick={() => searchContent()} disabled={loading} style={{ background: '#d4a373', border: 'none', borderRadius: '25px', padding: '10px 25px', fontWeight: 'bold', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}>{loading ? '...' : 'SEARCH'}</button>
               </div>
             </div>
 
             {loading ? (
-              <div style={{ textAlign: 'center', padding: '100px 0' }}>
-                <div style={{ fontSize: '40px', marginBottom: '20px' }}>⌛</div>
-                <h2 style={{ color: '#d4a373' }}>Finding the best books for you...</h2>
-              </div>
+              <div style={{ textAlign: 'center', padding: '100px 0' }}><h2 style={{ color: '#d4a373' }}>Finding the best books...</h2></div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '40px 25px' }}>
-                {books.map(book => (
-                  <div key={book.id} style={{ textAlign: 'center' }}>
-                    <div style={{ width: '100%', aspectRatio: '2/3', position: 'relative', boxShadow: '0 15px 35px rgba(0,0,0,0.7)', borderRadius: '2px 10px 10px 2px', overflow: 'hidden', borderLeft: '5px solid #333' }}>
-                      <img src={book.volumeInfo.imageLinks?.thumbnail || 'https://via.placeholder.com/150'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="book" />
+              <>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '40px 25px' }}>
+                  {books.map(book => (
+                    <div key={book.id} style={{ textAlign: 'center' }}>
+                      <div style={{ width: '100%', aspectRatio: '2/3', position: 'relative', boxShadow: '0 15px 35px rgba(0,0,0,0.7)', borderRadius: '2px 10px 10px 2px', overflow: 'hidden', borderLeft: '5px solid #333' }}>
+                        <img src={book.volumeInfo.imageLinks?.thumbnail || 'https://via.placeholder.com/150'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="book" />
+                      </div>
+                      <h4 style={{ fontSize: '14px', margin: '15px 0 10px', height: '40px', overflow: 'hidden' }}>{book.volumeInfo.title}</h4>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
+                        <button onClick={() => { setActiveBook(book); setModalType('dna'); }} style={{ padding: '8px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>✨ DNA</button>
+                        <button onClick={() => { setActiveBook(book); setModalType('read'); }} style={{ padding: '8px', background: '#fff', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>📖 READ</button>
+                        <a href={`https://www.amazon.in/s?k=${encodeURIComponent(book.volumeInfo.title)}&tag=thebrightway0-21`} target="_blank" style={{ textDecoration: 'none', padding: '8px', background: '#ff9900', color: '#000', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🛒 BUY</a>
+                        <a href={`https://www.google.com/search?q=${encodeURIComponent(book.volumeInfo.title + " filetype:pdf")}`} target="_blank" style={{ textDecoration: 'none', padding: '8px', background: '#10b981', color: '#fff', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📄 PDF</a>
+                        <button onClick={() => handleShare(book)} style={{ gridColumn: 'span 2', padding: '8px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>🔗 SHARE</button>
+                      </div>
                     </div>
-                    <h4 style={{ fontSize: '14px', margin: '15px 0 10px', height: '40px', overflow: 'hidden' }}>{book.volumeInfo.title}</h4>
-                    
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
-                      <button onClick={() => { setActiveBook(book); setModalType('dna'); }} style={{ padding: '8px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>✨ DNA</button>
-                      <button onClick={() => { setActiveBook(book); setModalType('read'); }} style={{ padding: '8px', background: '#fff', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>📖 READ</button>
-                      
-                      <a href={`https://www.amazon.in/s?k=${encodeURIComponent(book.volumeInfo.title)}&tag=thebrightway0-21`} target="_blank" style={{ textDecoration: 'none', padding: '8px', background: '#ff9900', color: '#000', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🛒 BUY</a>
-                      <a href={`https://www.google.com/search?q=${encodeURIComponent(book.volumeInfo.title + " filetype:pdf")}`} target="_blank" style={{ textDecoration: 'none', padding: '8px', background: '#10b981', color: '#fff', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📄 PDF</a>
-                      
-                      <button onClick={() => handleShare(book)} style={{ gridColumn: 'span 2', padding: '8px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>🔗 SHARE WITH FRIENDS</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+                {/* MULTIPLEX AD AFTER BOOK GRID */}
+                <MultiplexAd />
+              </>
             )}
           </div>
         ) : (
-          /* MSN NEWS VIEW */
-          <Newsstand />
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <Newsstand />
+            {/* MULTIPLEX AD AFTER NEWS */}
+            <MultiplexAd />
+          </div>
         )}
       </main>
 
-      {/* FOOTER (REDUCED Z-INDEX TO NOT OVERLAP ADS) */}
       <footer style={{ padding: '50px 5%', background: '#1a120b', borderTop: '1px solid #3c2a21', marginTop: '50px', textAlign: 'center' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px', marginBottom: '30px', textAlign: 'left' }}>
-          <div>
-            <h3 style={{ color: '#d4a373' }}>About The Brightway</h3>
-            <p style={{ fontSize: '14px', lineHeight: '1.6', color: '#aaa' }}>The Brightway is a next-generation digital library providing AI-powered book insights and a global newsstand.</p>
-          </div>
-          <div>
-            <h3 style={{ color: '#d4a373' }}>Quick Links</h3>
-            <ul style={{ listStyle: 'none', padding: 0, fontSize: '14px', color: '#aaa' }}>
-              <li style={{ marginBottom: '10px' }}><a href="/about" style={{ color: '#aaa', textDecoration: 'none' }}>✓ About Us</a></li>
-              <li style={{ marginBottom: '10px' }}><a href="/privacy" style={{ color: '#aaa', textDecoration: 'none' }}>✓ Privacy Policy</a></li>
-            </ul>
-          </div>
-          <div>
-            <h3 style={{ color: '#d4a373' }}>Contact & Support</h3>
-            <p style={{ fontSize: '14px', color: '#aaa' }}>Reach out: <strong>support@thebrightway.vercel.app</strong></p>
-          </div>
+          <div><h3 style={{ color: '#d4a373' }}>About The Brightway</h3><p style={{ fontSize: '14px', color: '#aaa' }}>AI-powered book insights and global newsstand.</p></div>
+          <div><h3 style={{ color: '#d4a373' }}>Quick Links</h3><ul style={{ listStyle: 'none', padding: 0, fontSize: '14px', color: '#aaa' }}><li style={{ marginBottom: '10px' }}><a href="/privacy" style={{ color: '#aaa', textDecoration: 'none' }}>✓ Privacy Policy</a></li></ul></div>
+          <div><h3 style={{ color: '#d4a373' }}>Support</h3><p style={{ fontSize: '14px', color: '#aaa' }}>support@thebrightway.vercel.app</p></div>
         </div>
-        <div style={{ borderTop: '1px solid #261a14', paddingTop: '20px', fontSize: '12px', color: '#555' }}>
-          © 2026 THE BRIGHTWAY LIBRARY | ALL RIGHTS RESERVED
-        </div>
+        <div style={{ borderTop: '1px solid #261a14', paddingTop: '20px', fontSize: '12px', color: '#555' }}>© 2026 THE BRIGHTWAY LIBRARY</div>
       </footer>
 
-      {/* MODAL SYSTEM */}
       {activeBook && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.96)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
           <div style={{ background: '#fff', color: '#000', width: '100%', maxWidth: '850px', height: '85vh', borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
@@ -213,15 +189,15 @@ export default function Library() {
             <div style={{ flex: 1, padding: '30px', overflowY: 'auto' }}>
               {modalType === 'dna' ? (
                 <div style={{ display: 'grid', gap: '20px' }}>
-                  <div style={{ textAlign: 'center', color: '#3b82f6', fontSize: '20px', fontWeight: 'bold' }}>💡 AI KNOWLEDGE EXTRACTION</div>
+                  <div style={{ textAlign: 'center', color: '#3b82f6', fontSize: '20px', fontWeight: 'bold' }}>💡 AI KNOWLEDGE</div>
                   {getBookDNA(activeBook).map((item, i) => (
                     <div key={i} style={{ padding: '20px', background: '#f0f7ff', borderRadius: '12px', borderLeft: '6px solid #3b82f6' }}>
                       <strong style={{ color: '#3b82f6', display: 'block', marginBottom: '5px' }}>{item.label}</strong>
-                      <p style={{ margin: 0, lineHeight: '1.6' }}>{item.text}</p>
+                      <p style={{ margin: 0 }}>{item.text}</p>
                     </div>
                   ))}
-                  {/* Native Ad inside DNA Modal for extra revenue */}
-                  <AdSlot id="3870942373" />
+                  {/* Multiplex Ad inside Modal after DNA points */}
+                  <MultiplexAd />
                 </div>
               ) : (
                 <iframe src={`https://books.google.com/books?id=${activeBook.id}&printsec=frontcover&output=embed`} style={{ width: '100%', height: '100%', border: 'none' }} />

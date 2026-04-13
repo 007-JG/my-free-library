@@ -113,12 +113,11 @@ export default function Library() {
                     <button onClick={() => { setActiveBook(book); setModalType('dna'); }} style={{ padding: '8px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>✨ DNA</button>
                     <button onClick={() => { setActiveBook(book); setModalType('read'); }} style={{ padding: '8px', background: '#fff', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>📖 READ</button>
                     
-                    {/* UPDATED AMAZON LINK WITH YOUR ID */}
+                    {/* AMAZON AFFILIATE LINK */}
                     <a href={`https://www.amazon.in/s?k=${encodeURIComponent(book.volumeInfo.title)}&tag=thebrightway0-21`} target="_blank" style={{ textDecoration: 'none', padding: '8px', background: '#ff9900', color: '#000', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🛒 BUY</a>
                     
                     <a href={`https://www.google.com/search?q=${encodeURIComponent(book.volumeInfo.title + " filetype:pdf")}`} target="_blank" style={{ textDecoration: 'none', padding: '8px', background: '#10b981', color: '#fff', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📄 PDF</a>
                     
-                    {/* SHARE BUTTON */}
                     <button onClick={() => handleShare(book)} style={{ gridColumn: 'span 2', padding: '8px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>🔗 SHARE WITH FRIENDS</button>
                   </div>
                 </div>
@@ -130,7 +129,7 @@ export default function Library() {
         )}
       </main>
 
-      {/* FOOTER */}
+      {/* FOOTER WITH ABOUT & PRIVACY LINKS */}
       <footer style={{ padding: '50px 5%', background: '#1a120b', borderTop: '1px solid #3c2a21', marginTop: '50px', textAlign: 'center', position: 'relative', zIndex: 5 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px', marginBottom: '30px', textAlign: 'left' }}>
           <div>
@@ -142,7 +141,12 @@ export default function Library() {
             <ul style={{ listStyle: 'none', padding: 0, fontSize: '14px', color: '#aaa' }}>
               <li style={{ marginBottom: '10px' }}>✓ AI Knowledge Extraction</li>
               <li style={{ marginBottom: '10px' }}>✓ International Newspapers</li>
-              <li style={{ marginBottom: '10px' }}>✓ Digital Reading Room</li>
+              <li style={{ marginBottom: '10px' }}>
+                <a href="/about" style={{ color: '#aaa', textDecoration: 'none' }}>✓ About Us</a>
+              </li>
+              <li style={{ marginBottom: '10px' }}>
+                <a href="/privacy" style={{ color: '#aaa', textDecoration: 'none' }}>✓ Privacy Policy</a>
+              </li>
             </ul>
           </div>
           <div>

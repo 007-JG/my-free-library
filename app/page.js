@@ -3,9 +3,9 @@ import React, { useState, useEffect } from 'react';
 import Newsstand from './components/Newsstand'; 
 
 // --- AD COMPONENTS ---
-// 1. Standard Display Ad (Jo tune pehle diya tha)
+// 1. Standard Display Ad
 const AdSlot = ({ id }) => (
-  <div style={{ margin: '20px auto', textAlign: 'center', background: '#261a14', padding: '15px', borderRadius: '10px', border: '1px solid #3c2a21', maxWidth: '1200px' }}>
+  <div style={{ margin: '20px auto', textAlign: 'center', background: '#261a14', padding: '15px', borderRadius: '10px', border: '1px solid #3c2a21', maxWidth: '1200px', minHeight: '100px' }}>
     <span style={{ fontSize: '10px', color: '#d4a373', display: 'block', marginBottom: '8px', letterSpacing: '1px' }}>SPONSORED CONTENT</span>
     <ins className="adsbygoogle"
          style={{ display: 'block' }}
@@ -16,9 +16,9 @@ const AdSlot = ({ id }) => (
   </div>
 );
 
-// 2. Multiplex Ad (Naya waala jo tune abhi bheja)
+// 2. Multiplex Ad (Grid style recommendations)
 const MultiplexAd = () => (
-  <div style={{ margin: '30px auto', padding: '15px', background: '#1a120b', borderRadius: '12px', border: '1px solid #d4a373' }}>
+  <div style={{ margin: '30px auto', padding: '15px', background: '#1a120b', borderRadius: '12px', border: '1px solid #d4a373', overflow: 'hidden' }}>
      <span style={{ fontSize: '10px', color: '#d4a373', display: 'block', marginBottom: '10px' }}>YOU MAY ALSO LIKE</span>
      <ins className="adsbygoogle"
           style={{ display: 'block' }}
@@ -43,7 +43,7 @@ export default function Library() {
     { group: "Global", langs: [
       { code: 'en', name: 'English 🇺🇸' }, { code: 'hi', name: 'Hindi 🇮🇳' }, 
       { code: 'fr', name: 'French 🇫🇷' }, { code: 'es', name: 'Spanish 🇪🇸' }, 
-      { code: 'ja', name: 'Japanese 🇺🇸' }, { code: 'ar', name: 'Arabic 🇸🇦' }
+      { code: 'ja', name: 'Japanese 🇯🇵' }, { code: 'ar', name: 'Arabic 🇸🇦' }
     ]},
     { group: "Indian", langs: [
       { code: 'pa', name: 'Punjabi 🇮🇳' }, { code: 'mr', name: 'Marathi 🇮🇳' }, 
@@ -88,10 +88,23 @@ export default function Library() {
     }
   };
 
+  // Logic to trigger AdSense ads on component mount and view change
   useEffect(() => { 
     if(contentType === 'books') searchContent(); 
-    // Trigger Ads
-    try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
+    
+    // Refresh AdSense Ads
+    const pushAd = () => {
+      try {
+        const adsbygoogle = window.adsbygoogle || [];
+        adsbygoogle.push({});
+      } catch (e) {
+        // Silence push errors if ads are already filled
+      }
+    };
+    
+    // Small timeout ensures DOM is ready
+    const adTimer = setTimeout(pushAd, 1000);
+    return () => clearTimeout(adTimer);
   }, [lang, contentType]);
 
   return (
@@ -105,8 +118,8 @@ export default function Library() {
         </div>
         
         <div style={{ display: 'flex', background: '#1a120b', borderRadius: '30px', padding: '5px', border: '1px solid #3c2a21' }}>
-          <button onClick={() => setContentType('books')} style={{ padding: '10px 25px', borderRadius: '25px', border: 'none', background: contentType === 'books' ? '#d4a373' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}>📚 BOOKS</button>
-          <button onClick={() => setContentType('news')} style={{ padding: '10px 25px', borderRadius: '25px', border: 'none', background: contentType === 'news' ? '#d4a373' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}>📰 NEWS</button>
+          <button onClick={() => setContentType('books')} style={{ padding: '10px 25px', borderRadius: '25px', border: 'none', background: contentType === 'books' ? '#d4a373' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 'bold', transition: '0.3s' }}>📚 BOOKS</button>
+          <button onClick={() => setContentType('news')} style={{ padding: '10px 25px', borderRadius: '25px', border: 'none', background: contentType === 'news' ? '#d4a373' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 'bold', transition: '0.3s' }}>📰 NEWS</button>
         </div>
 
         <select value={lang} onChange={(e) => setLang(e.target.value)} style={{ background: '#1a120b', color: '#fff', border: '1px solid #d4a373', padding: '8px', borderRadius: '8px', cursor: 'pointer' }}>
@@ -183,7 +196,7 @@ export default function Library() {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.96)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
           <div style={{ background: '#fff', color: '#000', width: '100%', maxWidth: '850px', height: '85vh', borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             <div style={{ padding: '20px', background: '#f8f9fa', borderBottom: '1px solid #ddd', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ fontSize: '18px', margin: 0 }}>{activeBook.volumeInfo.title}</h2>
+              <h2 style={{ fontSize: '18px', margin: 0, color: '#261a14' }}>{activeBook.volumeInfo.title}</h2>
               <button onClick={() => { setActiveBook(null); setModalType(null); }} style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '8px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>✕ CLOSE</button>
             </div>
             <div style={{ flex: 1, padding: '30px', overflowY: 'auto' }}>
@@ -193,10 +206,10 @@ export default function Library() {
                   {getBookDNA(activeBook).map((item, i) => (
                     <div key={i} style={{ padding: '20px', background: '#f0f7ff', borderRadius: '12px', borderLeft: '6px solid #3b82f6' }}>
                       <strong style={{ color: '#3b82f6', display: 'block', marginBottom: '5px' }}>{item.label}</strong>
-                      <p style={{ margin: 0 }}>{item.text}</p>
+                      <p style={{ margin: 0, color: '#333' }}>{item.text}</p>
                     </div>
                   ))}
-                  {/* Multiplex Ad inside Modal after DNA points */}
+                  {/* MULTIPLEX AD INSIDE MODAL */}
                   <MultiplexAd />
                 </div>
               ) : (

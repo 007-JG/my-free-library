@@ -24,6 +24,26 @@ export default function Library() {
     ]}
   ];
 
+  // NEW: Universal Share Function
+  const handleShare = async (book) => {
+    const shareData = {
+      title: book.volumeInfo.title,
+      text: `Check out this book on The Brightway Library: ${book.volumeInfo.title}`,
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(`${shareData.text} - ${shareData.url}`);
+        alert('Link copied to clipboard!');
+      }
+    } catch (err) {
+      console.log('Error sharing:', err);
+    }
+  };
+
   const getBookDNA = (book) => {
     const desc = book.volumeInfo.description?.replace(/<\/?[^>]+(>|$)/g, "") || "Detailed knowledge extraction in progress...";
     const points = desc.split(/[.!?]+\s+/).filter(s => s.length > 35).slice(0, 4);
@@ -69,10 +89,10 @@ export default function Library() {
             <div style={{ marginBottom: '40px', textAlign: 'center' }}>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '25px' }}>
                 {genres.map(g => (
-                  <button key={g} onClick={() => searchContent(g)} style={{ padding: '8px 15px', borderRadius: '20px', border: '1px solid #3c2a21', background: '#261a14', color: '#d4a373', cursor: 'pointer', fontSize: '13px', zIndex: 20 }}>{g}</button>
+                  <button key={g} onClick={() => searchContent(g)} style={{ padding: '8px 15px', borderRadius: '20px', border: '1px solid #3c2a21', background: '#261a14', color: '#d4a373', cursor: 'pointer', fontSize: '13px' }}>{g}</button>
                 ))}
               </div>
-              <div style={{ display: 'inline-flex', background: '#261a14', borderRadius: '30px', padding: '5px', border: '1px solid #d4a373', position: 'relative', zIndex: 20 }}>
+              <div style={{ display: 'inline-flex', background: '#261a14', borderRadius: '30px', padding: '5px', border: '1px solid #d4a373' }}>
                 <input type="text" placeholder="Search Masterpieces..." value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && searchContent()}
                   style={{ background: 'transparent', border: 'none', color: '#fff', padding: '10px 20px', outline: 'none', width: '250px' }} />
                 <button onClick={() => searchContent()} style={{ background: '#d4a373', border: 'none', borderRadius: '25px', padding: '10px 25px', fontWeight: 'bold', cursor: 'pointer' }}>SEARCH</button>
@@ -82,18 +102,22 @@ export default function Library() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '50px 30px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '40px 25px' }}>
               {books.map(book => (
                 <div key={book.id} style={{ textAlign: 'center' }}>
                   <div style={{ width: '100%', aspectRatio: '2/3', position: 'relative', boxShadow: '0 15px 35px rgba(0,0,0,0.7)', borderRadius: '2px 10px 10px 2px', overflow: 'hidden', borderLeft: '5px solid #333' }}>
                     <img src={book.volumeInfo.imageLinks?.thumbnail || 'https://via.placeholder.com/150'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="book" />
                   </div>
-                  <h4 style={{ fontSize: '15px', margin: '15px 0 10px', height: '40px', overflow: 'hidden' }}>{book.volumeInfo.title}</h4>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px', position: 'relative', zIndex: 30 }}>
-                    <button onClick={() => { setActiveBook(book); setModalType('dna'); }} style={{ padding: '10px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '11px' }}>✨ AI DNA</button>
-                    <button onClick={() => { setActiveBook(book); setModalType('read'); }} style={{ padding: '10px', background: '#fff', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '11px' }}>📖 READ</button>
-                    <a href={`https://www.amazon.in/s?k=${encodeURIComponent(book.volumeInfo.title)}`} target="_blank" style={{ textDecoration: 'none', padding: '10px', background: '#ff9900', color: '#000', borderRadius: '5px', fontWeight: 'bold', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>🛒 BUY</a>
-                    <a href={`https://www.google.com/search?q=${encodeURIComponent(book.volumeInfo.title + " filetype:pdf")}`} target="_blank" style={{ textDecoration: 'none', padding: '10px', background: '#10b981', color: '#fff', borderRadius: '5px', fontWeight: 'bold', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>📄 PDF</a>
+                  <h4 style={{ fontSize: '14px', margin: '15px 0 10px', height: '40px', overflow: 'hidden' }}>{book.volumeInfo.title}</h4>
+                  
+                  {/* Action Grid Updated with 5 Buttons */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
+                    <button onClick={() => { setActiveBook(book); setModalType('dna'); }} style={{ padding: '8px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>✨ DNA</button>
+                    <button onClick={() => { setActiveBook(book); setModalType('read'); }} style={{ padding: '8px', background: '#fff', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>📖 READ</button>
+                    <a href={`https://www.amazon.in/s?k=${encodeURIComponent(book.volumeInfo.title)}`} target="_blank" style={{ textDecoration: 'none', padding: '8px', background: '#ff9900', color: '#000', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🛒 BUY</a>
+                    <a href={`https://www.google.com/search?q=${encodeURIComponent(book.volumeInfo.title + " filetype:pdf")}`} target="_blank" style={{ textDecoration: 'none', padding: '8px', background: '#10b981', color: '#fff', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📄 PDF</a>
+                    {/* NEW SHARE BUTTON */}
+                    <button onClick={() => handleShare(book)} style={{ gridColumn: 'span 2', padding: '8px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>🔗 SHARE WITH FRIENDS</button>
                   </div>
                 </div>
               ))}

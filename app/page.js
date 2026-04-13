@@ -9,6 +9,7 @@ export default function Library() {
   const [activeBook, setActiveBook] = useState(null);
   const [modalType, setModalType] = useState(null);
   const [contentType, setContentType] = useState('books');
+  const [loading, setLoading] = useState(false); // Naya Loading State
 
   const genres = ['Bestsellers', 'Fiction', 'Business', 'Technology', 'Science', 'History', 'Self-Help'];
   
@@ -16,7 +17,7 @@ export default function Library() {
     { group: "Global", langs: [
       { code: 'en', name: 'English 🇺🇸' }, { code: 'hi', name: 'Hindi 🇮🇳' }, 
       { code: 'fr', name: 'French 🇫🇷' }, { code: 'es', name: 'Spanish 🇪🇸' }, 
-      { code: 'ja', name: 'Japanese 🇯🇵' }, { code: 'ar', name: 'Arabic 🇸🇦' }
+      { code: 'ja', name: 'Japanese 🇺🇸' }, { code: 'ar', name: 'Arabic 🇸🇦' }
     ]},
     { group: "Indian", langs: [
       { code: 'pa', name: 'Punjabi 🇮🇳' }, { code: 'mr', name: 'Marathi 🇮🇳' }, 
@@ -49,11 +50,16 @@ export default function Library() {
 
   const searchContent = async (genreQuery = '') => {
     const finalQuery = genreQuery || query || 'trending';
+    setLoading(true); // Search shuru hote hi loading on
     try {
       const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${finalQuery}&langRestrict=${lang}&maxResults=20`);
       const data = await res.json();
       setBooks(data.items || []);
-    } catch (err) { console.error(err); }
+    } catch (err) { 
+      console.error(err); 
+    } finally {
+      setLoading(false); // Search khatam hote hi loading off
+    }
   };
 
   useEffect(() => { if(contentType === 'books') searchContent(); }, [lang, contentType]);
@@ -85,51 +91,76 @@ export default function Library() {
         {contentType === 'books' ? (
           <div>
             <div style={{ marginBottom: '40px', textAlign: 'center' }}>
+              {/* GENRE BUTTONS WITH LOADING LOCK */}
               <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '25px' }}>
                 {genres.map(g => (
-                  <button key={g} onClick={() => searchContent(g)} style={{ padding: '8px 15px', borderRadius: '20px', border: '1px solid #3c2a21', background: '#261a14', color: '#d4a373', cursor: 'pointer', fontSize: '13px' }}>{g}</button>
+                  <button 
+                    key={g} 
+                    disabled={loading}
+                    onClick={() => searchContent(g)} 
+                    style={{ 
+                      padding: '8px 15px', 
+                      borderRadius: '20px', 
+                      border: '1px solid #3c2a21', 
+                      background: '#261a14', 
+                      color: '#d4a373', 
+                      cursor: loading ? 'not-allowed' : 'pointer', 
+                      fontSize: '13px',
+                      opacity: loading ? 0.6 : 1,
+                      transition: '0.3s'
+                    }}
+                  >
+                    {g}
+                  </button>
                 ))}
               </div>
+              
               <div style={{ display: 'inline-flex', background: '#261a14', borderRadius: '30px', padding: '5px', border: '1px solid #d4a373' }}>
                 <input type="text" placeholder="Search Masterpieces..." value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && searchContent()}
                   style={{ background: 'transparent', border: 'none', color: '#fff', padding: '10px 20px', outline: 'none', width: '250px' }} />
-                <button onClick={() => searchContent()} style={{ background: '#d4a373', border: 'none', borderRadius: '25px', padding: '10px 25px', fontWeight: 'bold', cursor: 'pointer' }}>SEARCH</button>
-              </div>
-              <div style={{ marginTop: '20px', fontSize: '12px', color: '#666', fontStyle: 'italic' }}>
-                Trending: Free AI Book DNA • Digital Newsstand • Hindi & English E-Papers • Global Knowledge Hub
+                <button onClick={() => searchContent()} disabled={loading} style={{ background: '#d4a373', border: 'none', borderRadius: '25px', padding: '10px 25px', fontWeight: 'bold', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}>
+                  {loading ? '...' : 'SEARCH'}
+                </button>
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '40px 25px' }}>
-              {books.map(book => (
-                <div key={book.id} style={{ textAlign: 'center' }}>
-                  <div style={{ width: '100%', aspectRatio: '2/3', position: 'relative', boxShadow: '0 15px 35px rgba(0,0,0,0.7)', borderRadius: '2px 10px 10px 2px', overflow: 'hidden', borderLeft: '5px solid #333' }}>
-                    <img src={book.volumeInfo.imageLinks?.thumbnail || 'https://via.placeholder.com/150'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="book" />
+            {/* FEEDBACK SYSTEM */}
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '100px 0' }}>
+                <div style={{ fontSize: '40px', marginBottom: '20px' }}>⌛</div>
+                <h2 style={{ color: '#d4a373' }}>Finding the best books for you...</h2>
+                <p style={{ color: '#666' }}>Fetching from Global Library Databases</p>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '40px 25px' }}>
+                {books.map(book => (
+                  <div key={book.id} style={{ textAlign: 'center' }}>
+                    <div style={{ width: '100%', aspectRatio: '2/3', position: 'relative', boxShadow: '0 15px 35px rgba(0,0,0,0.7)', borderRadius: '2px 10px 10px 2px', overflow: 'hidden', borderLeft: '5px solid #333' }}>
+                      <img src={book.volumeInfo.imageLinks?.thumbnail || 'https://via.placeholder.com/150'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="book" />
+                    </div>
+                    <h4 style={{ fontSize: '14px', margin: '15px 0 10px', height: '40px', overflow: 'hidden' }}>{book.volumeInfo.title}</h4>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
+                      <button onClick={() => { setActiveBook(book); setModalType('dna'); }} style={{ padding: '8px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>✨ DNA</button>
+                      <button onClick={() => { setActiveBook(book); setModalType('read'); }} style={{ padding: '8px', background: '#fff', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>📖 READ</button>
+                      
+                      <a href={`https://www.amazon.in/s?k=${encodeURIComponent(book.volumeInfo.title)}&tag=thebrightway0-21`} target="_blank" style={{ textDecoration: 'none', padding: '8px', background: '#ff9900', color: '#000', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🛒 BUY</a>
+                      
+                      <a href={`https://www.google.com/search?q=${encodeURIComponent(book.volumeInfo.title + " filetype:pdf")}`} target="_blank" style={{ textDecoration: 'none', padding: '8px', background: '#10b981', color: '#fff', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📄 PDF</a>
+                      
+                      <button onClick={() => handleShare(book)} style={{ gridColumn: 'span 2', padding: '8px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>🔗 SHARE WITH FRIENDS</button>
+                    </div>
                   </div>
-                  <h4 style={{ fontSize: '14px', margin: '15px 0 10px', height: '40px', overflow: 'hidden' }}>{book.volumeInfo.title}</h4>
-                  
-                  {/* BUTTON GRID */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
-                    <button onClick={() => { setActiveBook(book); setModalType('dna'); }} style={{ padding: '8px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>✨ DNA</button>
-                    <button onClick={() => { setActiveBook(book); setModalType('read'); }} style={{ padding: '8px', background: '#fff', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>📖 READ</button>
-                    
-                    {/* AMAZON AFFILIATE LINK */}
-                    <a href={`https://www.amazon.in/s?k=${encodeURIComponent(book.volumeInfo.title)}&tag=thebrightway0-21`} target="_blank" style={{ textDecoration: 'none', padding: '8px', background: '#ff9900', color: '#000', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🛒 BUY</a>
-                    
-                    <a href={`https://www.google.com/search?q=${encodeURIComponent(book.volumeInfo.title + " filetype:pdf")}`} target="_blank" style={{ textDecoration: 'none', padding: '8px', background: '#10b981', color: '#fff', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📄 PDF</a>
-                    
-                    <button onClick={() => handleShare(book)} style={{ gridColumn: 'span 2', padding: '8px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>🔗 SHARE WITH FRIENDS</button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
           <Newsstand />
         )}
       </main>
 
-      {/* FOOTER WITH ABOUT & PRIVACY LINKS */}
+      {/* FOOTER */}
       <footer style={{ padding: '50px 5%', background: '#1a120b', borderTop: '1px solid #3c2a21', marginTop: '50px', textAlign: 'center', position: 'relative', zIndex: 5 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px', marginBottom: '30px', textAlign: 'left' }}>
           <div>
@@ -139,14 +170,9 @@ export default function Library() {
           <div>
             <h3 style={{ color: '#d4a373' }}>Quick Links</h3>
             <ul style={{ listStyle: 'none', padding: 0, fontSize: '14px', color: '#aaa' }}>
+              <li style={{ marginBottom: '10px' }}><a href="/about" style={{ color: '#aaa', textDecoration: 'none' }}>✓ About Us</a></li>
+              <li style={{ marginBottom: '10px' }}><a href="/privacy" style={{ color: '#aaa', textDecoration: 'none' }}>✓ Privacy Policy</a></li>
               <li style={{ marginBottom: '10px' }}>✓ AI Knowledge Extraction</li>
-              <li style={{ marginBottom: '10px' }}>✓ International Newspapers</li>
-              <li style={{ marginBottom: '10px' }}>
-                <a href="/about" style={{ color: '#aaa', textDecoration: 'none' }}>✓ About Us</a>
-              </li>
-              <li style={{ marginBottom: '10px' }}>
-                <a href="/privacy" style={{ color: '#aaa', textDecoration: 'none' }}>✓ Privacy Policy</a>
-              </li>
             </ul>
           </div>
           <div>

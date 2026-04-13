@@ -24,14 +24,12 @@ export default function Library() {
     ]}
   ];
 
-  // NEW: Universal Share Function
   const handleShare = async (book) => {
     const shareData = {
       title: book.volumeInfo.title,
       text: `Check out this book on The Brightway Library: ${book.volumeInfo.title}`,
       url: window.location.href,
     };
-
     try {
       if (navigator.share) {
         await navigator.share(shareData);
@@ -39,9 +37,7 @@ export default function Library() {
         await navigator.clipboard.writeText(`${shareData.text} - ${shareData.url}`);
         alert('Link copied to clipboard!');
       }
-    } catch (err) {
-      console.log('Error sharing:', err);
-    }
+    } catch (err) { console.log('Error sharing:', err); }
   };
 
   const getBookDNA = (book) => {
@@ -65,6 +61,7 @@ export default function Library() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#0f0f10', color: '#f5ebe0', fontFamily: 'serif', position: 'relative' }}>
       
+      {/* NAVIGATION */}
       <nav style={{ padding: '20px 5%', background: '#261a14', borderBottom: '5px solid #d4a373', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{ fontSize: '30px' }}>📖</span>
@@ -83,6 +80,7 @@ export default function Library() {
         </select>
       </nav>
 
+      {/* MAIN CONTENT */}
       <main style={{ padding: '30px 5%', position: 'relative', zIndex: 10 }}>
         {contentType === 'books' ? (
           <div>
@@ -110,13 +108,17 @@ export default function Library() {
                   </div>
                   <h4 style={{ fontSize: '14px', margin: '15px 0 10px', height: '40px', overflow: 'hidden' }}>{book.volumeInfo.title}</h4>
                   
-                  {/* Action Grid Updated with 5 Buttons */}
+                  {/* BUTTON GRID */}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
                     <button onClick={() => { setActiveBook(book); setModalType('dna'); }} style={{ padding: '8px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>✨ DNA</button>
                     <button onClick={() => { setActiveBook(book); setModalType('read'); }} style={{ padding: '8px', background: '#fff', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>📖 READ</button>
-                    <a href={`https://www.amazon.in/s?k=${encodeURIComponent(book.volumeInfo.title)}`} target="_blank" style={{ textDecoration: 'none', padding: '8px', background: '#ff9900', color: '#000', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🛒 BUY</a>
+                    
+                    {/* UPDATED AMAZON LINK WITH YOUR ID */}
+                    <a href={`https://www.amazon.in/s?k=${encodeURIComponent(book.volumeInfo.title)}&tag=thebrightway0-21`} target="_blank" style={{ textDecoration: 'none', padding: '8px', background: '#ff9900', color: '#000', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🛒 BUY</a>
+                    
                     <a href={`https://www.google.com/search?q=${encodeURIComponent(book.volumeInfo.title + " filetype:pdf")}`} target="_blank" style={{ textDecoration: 'none', padding: '8px', background: '#10b981', color: '#fff', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📄 PDF</a>
-                    {/* NEW SHARE BUTTON */}
+                    
+                    {/* SHARE BUTTON */}
                     <button onClick={() => handleShare(book)} style={{ gridColumn: 'span 2', padding: '8px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>🔗 SHARE WITH FRIENDS</button>
                   </div>
                 </div>
@@ -128,6 +130,7 @@ export default function Library() {
         )}
       </main>
 
+      {/* FOOTER */}
       <footer style={{ padding: '50px 5%', background: '#1a120b', borderTop: '1px solid #3c2a21', marginTop: '50px', textAlign: 'center', position: 'relative', zIndex: 5 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px', marginBottom: '30px', textAlign: 'left' }}>
           <div>
@@ -152,6 +155,7 @@ export default function Library() {
         </div>
       </footer>
 
+      {/* MODAL SYSTEM */}
       {activeBook && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.96)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
           <div style={{ background: '#fff', color: '#000', width: '100%', maxWidth: '850px', height: '85vh', borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>

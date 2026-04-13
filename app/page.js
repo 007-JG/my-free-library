@@ -2,6 +2,19 @@
 import React, { useState, useEffect } from 'react';
 import Newsstand from './components/Newsstand'; 
 
+// --- AD COMPONENT (Aapki ID ke saath) ---
+const AdSlot = ({ id }) => (
+  <div style={{ margin: '20px auto', textAlign: 'center', background: '#261a14', padding: '15px', borderRadius: '10px', border: '1px solid #3c2a21', maxWidth: '1200px' }}>
+    <span style={{ fontSize: '10px', color: '#d4a373', display: 'block', marginBottom: '8px', letterSpacing: '1px' }}>SPONSORED CONTENT</span>
+    <ins className="adsbygoogle"
+         style={{ display: 'block' }}
+         data-ad-client="ca-pub-6453585356934687"
+         data-ad-slot={id}
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+  </div>
+);
+
 export default function Library() {
   const [query, setQuery] = useState('');
   const [books, setBooks] = useState([]);
@@ -9,7 +22,7 @@ export default function Library() {
   const [activeBook, setActiveBook] = useState(null);
   const [modalType, setModalType] = useState(null);
   const [contentType, setContentType] = useState('books');
-  const [loading, setLoading] = useState(false); // Naya Loading State
+  const [loading, setLoading] = useState(false);
 
   const genres = ['Bestsellers', 'Fiction', 'Business', 'Technology', 'Science', 'History', 'Self-Help'];
   
@@ -29,7 +42,7 @@ export default function Library() {
     const shareData = {
       title: book.volumeInfo.title,
       text: `Check out this book on The Brightway Library: ${book.volumeInfo.title}`,
-      url: window.location.href,
+      url: typeof window !== 'undefined' ? window.location.href : '',
     };
     try {
       if (navigator.share) {
@@ -50,7 +63,7 @@ export default function Library() {
 
   const searchContent = async (genreQuery = '') => {
     const finalQuery = genreQuery || query || 'trending';
-    setLoading(true); // Search shuru hote hi loading on
+    setLoading(true);
     try {
       const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${finalQuery}&langRestrict=${lang}&maxResults=20`);
       const data = await res.json();
@@ -58,11 +71,15 @@ export default function Library() {
     } catch (err) { 
       console.error(err); 
     } finally {
-      setLoading(false); // Search khatam hote hi loading off
+      setLoading(false);
     }
   };
 
-  useEffect(() => { if(contentType === 'books') searchContent(); }, [lang, contentType]);
+  useEffect(() => { 
+    if(contentType === 'books') searchContent(); 
+    // AdSense initialize
+    try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
+  }, [lang, contentType]);
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#0f0f10', color: '#f5ebe0', fontFamily: 'serif', position: 'relative' }}>
@@ -88,10 +105,13 @@ export default function Library() {
 
       {/* MAIN CONTENT */}
       <main style={{ padding: '30px 5%', position: 'relative', zIndex: 10 }}>
+        
+        {/* TOP AD SLOT (Both for News & Books) */}
+        <AdSlot id="3870942373" />
+
         {contentType === 'books' ? (
           <div>
             <div style={{ marginBottom: '40px', textAlign: 'center' }}>
-              {/* GENRE BUTTONS WITH LOADING LOCK */}
               <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '25px' }}>
                 {genres.map(g => (
                   <button 
@@ -124,12 +144,10 @@ export default function Library() {
               </div>
             </div>
 
-            {/* FEEDBACK SYSTEM */}
             {loading ? (
               <div style={{ textAlign: 'center', padding: '100px 0' }}>
                 <div style={{ fontSize: '40px', marginBottom: '20px' }}>⌛</div>
                 <h2 style={{ color: '#d4a373' }}>Finding the best books for you...</h2>
-                <p style={{ color: '#666' }}>Fetching from Global Library Databases</p>
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '40px 25px' }}>
@@ -145,7 +163,6 @@ export default function Library() {
                       <button onClick={() => { setActiveBook(book); setModalType('read'); }} style={{ padding: '8px', background: '#fff', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>📖 READ</button>
                       
                       <a href={`https://www.amazon.in/s?k=${encodeURIComponent(book.volumeInfo.title)}&tag=thebrightway0-21`} target="_blank" style={{ textDecoration: 'none', padding: '8px', background: '#ff9900', color: '#000', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🛒 BUY</a>
-                      
                       <a href={`https://www.google.com/search?q=${encodeURIComponent(book.volumeInfo.title + " filetype:pdf")}`} target="_blank" style={{ textDecoration: 'none', padding: '8px', background: '#10b981', color: '#fff', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📄 PDF</a>
                       
                       <button onClick={() => handleShare(book)} style={{ gridColumn: 'span 2', padding: '8px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>🔗 SHARE WITH FRIENDS</button>
@@ -156,12 +173,13 @@ export default function Library() {
             )}
           </div>
         ) : (
+          /* MSN NEWS VIEW */
           <Newsstand />
         )}
       </main>
 
-      {/* FOOTER */}
-      <footer style={{ padding: '50px 5%', background: '#1a120b', borderTop: '1px solid #3c2a21', marginTop: '50px', textAlign: 'center', position: 'relative', zIndex: 5 }}>
+      {/* FOOTER (REDUCED Z-INDEX TO NOT OVERLAP ADS) */}
+      <footer style={{ padding: '50px 5%', background: '#1a120b', borderTop: '1px solid #3c2a21', marginTop: '50px', textAlign: 'center' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px', marginBottom: '30px', textAlign: 'left' }}>
           <div>
             <h3 style={{ color: '#d4a373' }}>About The Brightway</h3>
@@ -172,7 +190,6 @@ export default function Library() {
             <ul style={{ listStyle: 'none', padding: 0, fontSize: '14px', color: '#aaa' }}>
               <li style={{ marginBottom: '10px' }}><a href="/about" style={{ color: '#aaa', textDecoration: 'none' }}>✓ About Us</a></li>
               <li style={{ marginBottom: '10px' }}><a href="/privacy" style={{ color: '#aaa', textDecoration: 'none' }}>✓ Privacy Policy</a></li>
-              <li style={{ marginBottom: '10px' }}>✓ AI Knowledge Extraction</li>
             </ul>
           </div>
           <div>
@@ -203,6 +220,8 @@ export default function Library() {
                       <p style={{ margin: 0, lineHeight: '1.6' }}>{item.text}</p>
                     </div>
                   ))}
+                  {/* Native Ad inside DNA Modal for extra revenue */}
+                  <AdSlot id="3870942373" />
                 </div>
               ) : (
                 <iframe src={`https://books.google.com/books?id=${activeBook.id}&printsec=frontcover&output=embed`} style={{ width: '100%', height: '100%', border: 'none' }} />

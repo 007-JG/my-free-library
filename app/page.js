@@ -43,10 +43,9 @@ export default function Library() {
   useEffect(() => { if(contentType === 'books') searchContent(); }, [lang, contentType]);
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0f0f10', color: '#f5ebe0', fontFamily: 'serif' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0f0f10', color: '#f5ebe0', fontFamily: 'serif', position: 'relative' }}>
       
-      {/* Smart Navbar */}
-      <nav style={{ padding: '20px 5%', background: '#261a14', borderBottom: '5px solid #d4a373', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+      <nav style={{ padding: '20px 5%', background: '#261a14', borderBottom: '5px solid #d4a373', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{ fontSize: '30px' }}>📖</span>
           <h1 style={{ color: '#d4a373', margin: 0, fontSize: '24px', letterSpacing: '1px' }}>BRIGHTWAY <span style={{color:'#fff'}}>LIBRARY</span></h1>
@@ -57,29 +56,27 @@ export default function Library() {
           <button onClick={() => setContentType('news')} style={{ padding: '10px 25px', borderRadius: '25px', border: 'none', background: contentType === 'news' ? '#d4a373' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}>📰 NEWS</button>
         </div>
 
-        <select value={lang} onChange={(e) => setLang(e.target.value)} style={{ background: '#1a120b', color: '#fff', border: '1px solid #d4a373', padding: '8px', borderRadius: '8px' }}>
+        <select value={lang} onChange={(e) => setLang(e.target.value)} style={{ background: '#1a120b', color: '#fff', border: '1px solid #d4a373', padding: '8px', borderRadius: '8px', cursor: 'pointer' }}>
           {allLanguages.map(g => (
             <optgroup label={g.group} key={g.group}>{g.langs.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}</optgroup>
           ))}
         </select>
       </nav>
 
-      <main style={{ padding: '30px 5%' }}>
+      <main style={{ padding: '30px 5%', position: 'relative', zIndex: 10 }}>
         {contentType === 'books' ? (
           <div>
             <div style={{ marginBottom: '40px', textAlign: 'center' }}>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '25px' }}>
                 {genres.map(g => (
-                  <button key={g} onClick={() => searchContent(g)} style={{ padding: '8px 15px', borderRadius: '20px', border: '1px solid #3c2a21', background: '#261a14', color: '#d4a373', cursor: 'pointer', fontSize: '13px' }}>{g}</button>
+                  <button key={g} onClick={() => searchContent(g)} style={{ padding: '8px 15px', borderRadius: '20px', border: '1px solid #3c2a21', background: '#261a14', color: '#d4a373', cursor: 'pointer', fontSize: '13px', zIndex: 20 }}>{g}</button>
                 ))}
               </div>
-              <div style={{ display: 'inline-flex', background: '#261a14', borderRadius: '30px', padding: '5px', border: '1px solid #d4a373' }}>
+              <div style={{ display: 'inline-flex', background: '#261a14', borderRadius: '30px', padding: '5px', border: '1px solid #d4a373', position: 'relative', zIndex: 20 }}>
                 <input type="text" placeholder="Search Masterpieces..." value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && searchContent()}
                   style={{ background: 'transparent', border: 'none', color: '#fff', padding: '10px 20px', outline: 'none', width: '250px' }} />
                 <button onClick={() => searchContent()} style={{ background: '#d4a373', border: 'none', borderRadius: '25px', padding: '10px 25px', fontWeight: 'bold', cursor: 'pointer' }}>SEARCH</button>
               </div>
-
-              {/* NEW: SEO Keywords Section */}
               <div style={{ marginTop: '20px', fontSize: '12px', color: '#666', fontStyle: 'italic' }}>
                 Trending: Free AI Book DNA • Digital Newsstand • Hindi & English E-Papers • Global Knowledge Hub
               </div>
@@ -89,14 +86,14 @@ export default function Library() {
               {books.map(book => (
                 <div key={book.id} style={{ textAlign: 'center' }}>
                   <div style={{ width: '100%', aspectRatio: '2/3', position: 'relative', boxShadow: '0 15px 35px rgba(0,0,0,0.7)', borderRadius: '2px 10px 10px 2px', overflow: 'hidden', borderLeft: '5px solid #333' }}>
-                    <img src={book.volumeInfo.imageLinks?.thumbnail || 'https://via.placeholder.com/150'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={book.volumeInfo.imageLinks?.thumbnail || 'https://via.placeholder.com/150'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="book" />
                   </div>
                   <h4 style={{ fontSize: '15px', margin: '15px 0 10px', height: '40px', overflow: 'hidden' }}>{book.volumeInfo.title}</h4>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px', position: 'relative', zIndex: 30 }}>
                     <button onClick={() => { setActiveBook(book); setModalType('dna'); }} style={{ padding: '10px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '11px' }}>✨ AI DNA</button>
                     <button onClick={() => { setActiveBook(book); setModalType('read'); }} style={{ padding: '10px', background: '#fff', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '11px' }}>📖 READ</button>
-                    <a href={`https://www.amazon.in/s?k=${encodeURIComponent(book.volumeInfo.title)}`} target="_blank" style={{ textDecoration: 'none', padding: '10px', background: '#ff9900', color: '#000', borderRadius: '5px', fontWeight: 'bold', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🛒 BUY</a>
-                    <a href={`https://www.google.com/search?q=${encodeURIComponent(book.volumeInfo.title + " filetype:pdf")}`} target="_blank" style={{ textDecoration: 'none', padding: '10px', background: '#10b981', color: '#fff', borderRadius: '5px', fontWeight: 'bold', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📄 PDF</a>
+                    <a href={`https://www.amazon.in/s?k=${encodeURIComponent(book.volumeInfo.title)}`} target="_blank" style={{ textDecoration: 'none', padding: '10px', background: '#ff9900', color: '#000', borderRadius: '5px', fontWeight: 'bold', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>🛒 BUY</a>
+                    <a href={`https://www.google.com/search?q=${encodeURIComponent(book.volumeInfo.title + " filetype:pdf")}`} target="_blank" style={{ textDecoration: 'none', padding: '10px', background: '#10b981', color: '#fff', borderRadius: '5px', fontWeight: 'bold', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>📄 PDF</a>
                   </div>
                 </div>
               ))}
@@ -107,12 +104,11 @@ export default function Library() {
         )}
       </main>
 
-      {/* NEW: Footer with About/Contact */}
-      <footer style={{ padding: '50px 5%', background: '#1a120b', borderTop: '1px solid #3c2a21', marginTop: '50px', textAlign: 'center' }}>
+      <footer style={{ padding: '50px 5%', background: '#1a120b', borderTop: '1px solid #3c2a21', marginTop: '50px', textAlign: 'center', position: 'relative', zIndex: 5 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px', marginBottom: '30px', textAlign: 'left' }}>
           <div>
             <h3 style={{ color: '#d4a373' }}>About The Brightway</h3>
-            <p style={{ fontSize: '14px', lineHeight: '1.6', color: '#aaa' }}>The Brightway is a next-generation digital library providing AI-powered book insights and a global newsstand. Our mission is to make knowledge accessible and fast for everyone.</p>
+            <p style={{ fontSize: '14px', lineHeight: '1.6', color: '#aaa' }}>The Brightway is a next-generation digital library providing AI-powered book insights and a global newsstand.</p>
           </div>
           <div>
             <h3 style={{ color: '#d4a373' }}>Quick Links</h3>
@@ -124,7 +120,7 @@ export default function Library() {
           </div>
           <div>
             <h3 style={{ color: '#d4a373' }}>Contact & Support</h3>
-            <p style={{ fontSize: '14px', color: '#aaa' }}>Found a bug or have a suggestion? Reach out to us at <strong>support@thebrightway.vercel.app</strong></p>
+            <p style={{ fontSize: '14px', color: '#aaa' }}>Reach out: <strong>support@thebrightway.vercel.app</strong></p>
           </div>
         </div>
         <div style={{ borderTop: '1px solid #261a14', paddingTop: '20px', fontSize: '12px', color: '#555' }}>
@@ -132,7 +128,6 @@ export default function Library() {
         </div>
       </footer>
 
-      {/* Feature Modal */}
       {activeBook && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.96)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
           <div style={{ background: '#fff', color: '#000', width: '100%', maxWidth: '850px', height: '85vh', borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>

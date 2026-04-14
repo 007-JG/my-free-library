@@ -1,4 +1,4 @@
-import Script from 'next/script' // Naya import
+import "./globals.css"; // Agar koi CSS file hai toh
 
 export const metadata = {
   title: 'The Brightway Library | AI Book DNA & Newspapers',
@@ -12,13 +12,13 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        {/* --- ADSENSE GLOBAL SCRIPT --- */}
-        <Script
-          async
+        {/* --- ADSENSE VERIFICATION SCRIPT --- */}
+        {/* Verification ke liye seedha script tag best hai */}
+        <script 
+          async 
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6453585356934687"
-          crossorigin="anonymous"
-          strategy="afterInteractive" // Site load hone ke baad load hoga (Best for speed)
-        />
+          crossOrigin="anonymous">
+        </script>
       </head>
       <body style={{ margin: 0 }}>
         {children}

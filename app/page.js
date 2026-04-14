@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import Newsstand from './components/Newsstand'; 
 
 // --- AD COMPONENTS ---
-// 1. Standard Display Ad
 const AdSlot = ({ id }) => (
   <div style={{ margin: '20px auto', textAlign: 'center', background: '#261a14', padding: '15px', borderRadius: '10px', border: '1px solid #3c2a21', maxWidth: '1200px', minHeight: '100px' }}>
     <span style={{ fontSize: '10px', color: '#d4a373', display: 'block', marginBottom: '8px', letterSpacing: '1px' }}>SPONSORED CONTENT</span>
@@ -16,7 +15,6 @@ const AdSlot = ({ id }) => (
   </div>
 );
 
-// 2. Multiplex Ad (Grid style recommendations)
 const MultiplexAd = () => (
   <div style={{ margin: '30px auto', padding: '15px', background: '#1a120b', borderRadius: '12px', border: '1px solid #d4a373', overflow: 'hidden' }}>
      <span style={{ fontSize: '10px', color: '#d4a373', display: 'block', marginBottom: '10px' }}>YOU MAY ALSO LIKE</span>
@@ -78,34 +76,34 @@ export default function Library() {
     const finalQuery = genreQuery || query || 'trending';
     setLoading(true);
     try {
-      const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${finalQuery}&langRestrict=${lang}&maxResults=20`);
+      // encodeURIComponent lagaya hai taaki special characters API crash na karein
+      const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(finalQuery)}&langRestrict=${lang}&maxResults=20`);
       const data = await res.json();
       setBooks(data.items || []);
     } catch (err) { 
-      console.error(err); 
+      console.error("API Error:", err); 
     } finally {
       setLoading(false);
     }
   };
 
-  // Logic to trigger AdSense ads on component mount and view change
+  // Logic to fix 429 Error & Trigger Ads safely
   useEffect(() => { 
-    if(contentType === 'books') searchContent(); 
+    // Books tab pe ho aur pehle se books na ho, tabhi load karega (Request limit fix)
+    if(contentType === 'books' && books.length === 0) {
+      searchContent(); 
+    }
     
-    // Refresh AdSense Ads
     const pushAd = () => {
       try {
         const adsbygoogle = window.adsbygoogle || [];
         adsbygoogle.push({});
-      } catch (e) {
-        // Silence push errors if ads are already filled
-      }
+      } catch (e) {}
     };
     
-    // Small timeout ensures DOM is ready
-    const adTimer = setTimeout(pushAd, 1000);
+    const adTimer = setTimeout(pushAd, 2000); // 2 second delay for better stability
     return () => clearTimeout(adTimer);
-  }, [lang, contentType]);
+  }, [contentType]); // lang hata diya taaki background refresh loop na bane
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#0f0f10', color: '#f5ebe0', fontFamily: 'serif', position: 'relative' }}>
@@ -122,7 +120,7 @@ export default function Library() {
           <button onClick={() => setContentType('news')} style={{ padding: '10px 25px', borderRadius: '25px', border: 'none', background: contentType === 'news' ? '#d4a373' : 'transparent', color: '#fff', cursor: 'pointer', fontWeight: 'bold', transition: '0.3s' }}>📰 NEWS</button>
         </div>
 
-        <select value={lang} onChange={(e) => setLang(e.target.value)} style={{ background: '#1a120b', color: '#fff', border: '1px solid #d4a373', padding: '8px', borderRadius: '8px', cursor: 'pointer' }}>
+        <select value={lang} onChange={(e) => { setLang(e.target.value); setBooks([]); }} style={{ background: '#1a120b', color: '#fff', border: '1px solid #d4a373', padding: '8px', borderRadius: '8px', cursor: 'pointer' }}>
           {allLanguages.map(g => (
             <optgroup label={g.group} key={g.group}>{g.langs.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}</optgroup>
           ))}
@@ -130,8 +128,6 @@ export default function Library() {
       </nav>
 
       <main style={{ padding: '30px 5%', position: 'relative', zIndex: 10 }}>
-        
-        {/* TOP DISPLAY AD */}
         <AdSlot id="3870942373" />
 
         {contentType === 'books' ? (
@@ -139,12 +135,12 @@ export default function Library() {
             <div style={{ marginBottom: '40px', textAlign: 'center' }}>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '25px' }}>
                 {genres.map(g => (
-                  <button key={g} disabled={loading} onClick={() => searchContent(g)} style={{ padding: '8px 15px', borderRadius: '20px', border: '1px solid #3c2a21', background: '#261a14', color: '#d4a373', cursor: loading ? 'not-allowed' : 'pointer', fontSize: '13px', opacity: loading ? 0.6 : 1, transition: '0.3s' }}>{g}</button>
+                  <button key={g} disabled={loading} onClick={() => { setBooks([]); searchContent(g); }} style={{ padding: '8px 15px', borderRadius: '20px', border: '1px solid #3c2a21', background: '#261a14', color: '#d4a373', cursor: loading ? 'not-allowed' : 'pointer', fontSize: '13px', opacity: loading ? 0.6 : 1, transition: '0.3s' }}>{g}</button>
                 ))}
               </div>
               <div style={{ display: 'inline-flex', background: '#261a14', borderRadius: '30px', padding: '5px', border: '1px solid #d4a373' }}>
-                <input type="text" placeholder="Search Masterpieces..." value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && searchContent()} style={{ background: 'transparent', border: 'none', color: '#fff', padding: '10px 20px', outline: 'none', width: '250px' }} />
-                <button onClick={() => searchContent()} disabled={loading} style={{ background: '#d4a373', border: 'none', borderRadius: '25px', padding: '10px 25px', fontWeight: 'bold', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}>{loading ? '...' : 'SEARCH'}</button>
+                <input type="text" placeholder="Search Masterpieces..." value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (setBooks([]), searchContent())} style={{ background: 'transparent', border: 'none', color: '#fff', padding: '10px 20px', outline: 'none', width: '250px' }} />
+                <button onClick={() => { setBooks([]); searchContent(); }} disabled={loading} style={{ background: '#d4a373', border: 'none', borderRadius: '25px', padding: '10px 25px', fontWeight: 'bold', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}>{loading ? '...' : 'SEARCH'}</button>
               </div>
             </div>
 
@@ -162,14 +158,13 @@ export default function Library() {
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
                         <button onClick={() => { setActiveBook(book); setModalType('dna'); }} style={{ padding: '8px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>✨ DNA</button>
                         <button onClick={() => { setActiveBook(book); setModalType('read'); }} style={{ padding: '8px', background: '#fff', color: '#000', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>📖 READ</button>
-                        <a href={`https://www.amazon.in/s?k=${encodeURIComponent(book.volumeInfo.title)}&tag=thebrightway0-21`} target="_blank" style={{ textDecoration: 'none', padding: '8px', background: '#ff9900', color: '#000', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🛒 BUY</a>
-                        <a href={`https://www.google.com/search?q=${encodeURIComponent(book.volumeInfo.title + " filetype:pdf")}`} target="_blank" style={{ textDecoration: 'none', padding: '8px', background: '#10b981', color: '#fff', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📄 PDF</a>
+                        <a href={`https://www.amazon.in/s?k=${encodeURIComponent(book.volumeInfo.title)}&tag=thebrightway0-21`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', padding: '8px', background: '#ff9900', color: '#000', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🛒 BUY</a>
+                        <a href={`https://www.google.com/search?q=${encodeURIComponent(book.volumeInfo.title + " filetype:pdf")}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', padding: '8px', background: '#10b981', color: '#fff', borderRadius: '5px', fontWeight: 'bold', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📄 PDF</a>
                         <button onClick={() => handleShare(book)} style={{ gridColumn: 'span 2', padding: '8px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>🔗 SHARE</button>
                       </div>
                     </div>
                   ))}
                 </div>
-                {/* MULTIPLEX AD AFTER BOOK GRID */}
                 <MultiplexAd />
               </>
             )}
@@ -177,7 +172,6 @@ export default function Library() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <Newsstand />
-            {/* MULTIPLEX AD AFTER NEWS */}
             <MultiplexAd />
           </div>
         )}
@@ -186,7 +180,12 @@ export default function Library() {
       <footer style={{ padding: '50px 5%', background: '#1a120b', borderTop: '1px solid #3c2a21', marginTop: '50px', textAlign: 'center' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px', marginBottom: '30px', textAlign: 'left' }}>
           <div><h3 style={{ color: '#d4a373' }}>About The Brightway</h3><p style={{ fontSize: '14px', color: '#aaa' }}>AI-powered book insights and global newsstand.</p></div>
-          <div><h3 style={{ color: '#d4a373' }}>Quick Links</h3><ul style={{ listStyle: 'none', padding: 0, fontSize: '14px', color: '#aaa' }}><li style={{ marginBottom: '10px' }}><a href="/privacy" style={{ color: '#aaa', textDecoration: 'none' }}>✓ Privacy Policy</a></li></ul></div>
+          <div><h3 style={{ color: '#d4a373' }}>Quick Links</h3>
+            <ul style={{ listStyle: 'none', padding: 0, fontSize: '14px', color: '#aaa' }}>
+              <li style={{ marginBottom: '10px' }}><a href="/about" style={{ color: '#aaa', textDecoration: 'none' }}>✓ About Us</a></li>
+              <li style={{ marginBottom: '10px' }}><a href="/privacy" style={{ color: '#aaa', textDecoration: 'none' }}>✓ Privacy Policy</a></li>
+            </ul>
+          </div>
           <div><h3 style={{ color: '#d4a373' }}>Support</h3><p style={{ fontSize: '14px', color: '#aaa' }}>support@thebrightway.vercel.app</p></div>
         </div>
         <div style={{ borderTop: '1px solid #261a14', paddingTop: '20px', fontSize: '12px', color: '#555' }}>© 2026 THE BRIGHTWAY LIBRARY</div>
@@ -209,11 +208,10 @@ export default function Library() {
                       <p style={{ margin: 0, color: '#333' }}>{item.text}</p>
                     </div>
                   ))}
-                  {/* MULTIPLEX AD INSIDE MODAL */}
                   <MultiplexAd />
                 </div>
               ) : (
-                <iframe src={`https://books.google.com/books?id=${activeBook.id}&printsec=frontcover&output=embed`} style={{ width: '100%', height: '100%', border: 'none' }} />
+                <iframe src={`https://books.google.com/books?id=${activeBook.id}&printsec=frontcover&output=embed`} style={{ width: '100%', height: '100%', border: 'none' }} title="book-reader" />
               )}
             </div>
           </div>

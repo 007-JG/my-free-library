@@ -72,12 +72,15 @@ export default function Library() {
     return points.map((p, i) => ({ label: labels[i] || "Insight", text: p }));
   };
 
+  // --- UPDATED SEARCH FUNCTION WITH API KEY ---
   const searchContent = async (genreQuery = '') => {
     const finalQuery = genreQuery || query || 'trending';
+    const API_KEY = "AIzaSyAvOGM-VizW63AVXkSUz9ld0UNKPIoCdoc"; // Teri key yahan fit kar di hai
+    
     setLoading(true);
     try {
-      // encodeURIComponent lagaya hai taaki special characters API crash na karein
-      const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(finalQuery)}&langRestrict=${lang}&maxResults=20`);
+      // URL mein key parameter add kar diya gaya hai
+      const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(finalQuery)}&langRestrict=${lang}&maxResults=20&key=${API_KEY}`);
       const data = await res.json();
       setBooks(data.items || []);
     } catch (err) { 
@@ -87,9 +90,7 @@ export default function Library() {
     }
   };
 
-  // Logic to fix 429 Error & Trigger Ads safely
   useEffect(() => { 
-    // Books tab pe ho aur pehle se books na ho, tabhi load karega (Request limit fix)
     if(contentType === 'books' && books.length === 0) {
       searchContent(); 
     }
@@ -101,9 +102,9 @@ export default function Library() {
       } catch (e) {}
     };
     
-    const adTimer = setTimeout(pushAd, 2000); // 2 second delay for better stability
+    const adTimer = setTimeout(pushAd, 2000);
     return () => clearTimeout(adTimer);
-  }, [contentType]); // lang hata diya taaki background refresh loop na bane
+  }, [contentType]);
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#0f0f10', color: '#f5ebe0', fontFamily: 'serif', position: 'relative' }}>

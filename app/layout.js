@@ -1,5 +1,3 @@
-import "./globals.css"; // Agar koi CSS file hai toh
-
 export const metadata = {
   title: 'The Brightway Library | AI Book DNA & Newspapers',
   description: 'Read free books, access AI-powered book summaries, and daily newspapers.',
@@ -13,7 +11,6 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head>
         {/* --- ADSENSE VERIFICATION SCRIPT --- */}
-        {/* Verification ke liye seedha script tag best hai */}
         <script 
           async 
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6453585356934687"

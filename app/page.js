@@ -20,27 +20,20 @@ export default function Home() {
 
   return (
     <div style={{ fontFamily: 'sans-serif', backgroundColor: '#fafaf9', minHeight: '100vh', color: '#1c1917' }}>
-      <header style={{ borderBottom: '1px solid #eee', padding: '30px 50px', backgroundColor: '#fff', textAlign: 'center' }}>
-        <h1 style={{ margin: 0, fontWeight: '950', fontSize: '32px', letterSpacing: '-2px' }}>THE BRIGHTWAY <span style={{ color: '#2563eb' }}>LIBRARY</span></h1>
-        <p style={{ color: '#888', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '4px', marginTop: '10px' }}>AI-Powered Strategic Vision Hub</p>
+      <header style={{ padding: '30px', textAlign: 'center', backgroundColor: '#fff', borderBottom: '1px solid #eee' }}>
+        <h1 style={{ margin: 0, fontWeight: '950', fontSize: '28px' }}>THE BRIGHTWAY <span style={{ color: '#2563eb' }}>LIBRARY</span></h1>
       </header>
 
-      <main style={{ maxWidth: '1000px', margin: '0 auto', padding: '60px 20px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '40px' }}>
-          {posts.length > 0 ? posts.map((post) => (
-            <div key={post.slug} style={{ backgroundColor: '#fff', padding: '40px', borderRadius: '20px', border: '1px solid #eee', transition: 'transform 0.2s' }}>
-              <span style={{ fontSize: '12px', fontWeight: '900', color: '#2563eb', textTransform: 'uppercase' }}>{post.date}</span>
-              <h3 style={{ fontSize: '32px', margin: '15px 0 25px 0', fontWeight: '900', lineHeight: '1.2' }}>{post.title}</h3>
-              <a href={`/posts?slug=${post.slug}`} style={{ background: '#2563eb', color: '#fff', padding: '12px 30px', borderRadius: '8px', fontWeight: 'bold', textDecoration: 'none', display: 'inline-block' }}>
-                Read AI Analysis
-              </a>
-            </div>
-          )) : (
-            <div style={{ textAlign: 'center', padding: '100px', border: '2px dashed #ddd', borderRadius: '20px' }}>
-              <p style={{ color: '#aaa', fontWeight: 'bold' }}>Our AI Bot is currently reading "Atomic Habits"... Insights coming soon.</p>
-            </div>
-          )}
-        </div>
+      <main style={{ maxWidth: '900px', margin: '0 auto', padding: '50px 20px' }}>
+        {posts.map((post) => (
+          <div key={post.slug} style={{ backgroundColor: '#fff', padding: '30px', borderRadius: '15px', marginBottom: '20px', border: '1px solid #eee' }}>
+            <p style={{ color: '#2563eb', fontWeight: '900', fontSize: '12px' }}>{post.date}</p>
+            <h2 style={{ fontSize: '28px', margin: '10px 0 20px 0' }}>{post.title}</h2>
+            <a href={`/posts?slug=${post.slug}`} style={{ background: '#2563eb', color: '#fff', padding: '10px 25px', borderRadius: '5px', textDecoration: 'none', fontWeight: 'bold' }}>
+              Read AI Analysis
+            </a>
+          </div>
+        ))}
       </main>
     </div>
   );

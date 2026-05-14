@@ -1,0 +1,36 @@
+name: Brightway SEO Engine
+on:
+  schedule:
+    - cron: '0 0 * * *' # Roz raat 12 baje khud chalega
+  workflow_dispatch: # Isse tu abhi button daba kar check kar sakta hai
+
+jobs:
+  generate-content:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Create SEO Article
+        run: |
+          mkdir -p content/posts
+          FILENAME="content/posts/habit-science-$(date +%Y%m%d).md"
+          echo "---" > $FILENAME
+          echo "title: 'The Hidden Psychology of Atomic Habits: Why Most People Fail'" >> $FILENAME
+          echo "date: '$(date +%Y-%m-%d)'" >> $FILENAME
+          echo "category: 'Habit Formation'" >> $FILENAME
+          echo "---" >> $FILENAME
+          echo "" >> $FILENAME
+          echo "## Strategic Vision for Behavioral Change" >> $FILENAME
+          echo "Based on behavioral psychology research from BJ Fogg and Charles Duhigg, habits fail without proper environment design." >> $FILENAME
+          echo "In The Brightway Library, we analyze these frameworks to provide actionable insights for long-term growth." >> $FILENAME
+
+      - name: Push to GitHub
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} # Ye wahi secret hai jo tune banaya tha
+        run: |
+          git config --global user.name 'Brightway-Bot'
+          git config --global user.email 'bot@thebrightway.com'
+          git add .
+          git commit -m "Auto-post: New Habit Analysis Added [Skip CI]" || echo "No changes"
+          git push origin main

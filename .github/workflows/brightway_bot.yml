@@ -2,7 +2,10 @@ name: Brightway SEO Engine
 on:
   schedule:
     - cron: '0 0 * * *' # Roz raat 12 baje khud chalega
-  workflow_dispatch: # Isse tu abhi button daba kar check kar sakta hai
+  workflow_dispatch: # Manual testing ke liye
+
+permissions:
+  contents: write # Ye line 403 error ko fix karegi
 
 jobs:
   generate-content:
@@ -27,7 +30,7 @@ jobs:
 
       - name: Push to GitHub
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} # Ye wahi secret hai jo tune banaya tha
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name 'Brightway-Bot'
           git config --global user.email 'bot@thebrightway.com'

@@ -5,7 +5,7 @@ on:
   workflow_dispatch: # Manual testing ke liye
 
 permissions:
-  contents: write # Ye line 403 error ko fix karegi
+  contents: write 
 
 jobs:
   generate-content:
@@ -14,19 +14,32 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Create SEO Article
+      - name: Create Deep-Dive Article
         run: |
           mkdir -p content/posts
-          FILENAME="content/posts/habit-science-$(date +%Y%m%d).md"
+          # Har din naya topic select karne ke liye dynamic filename
+          FILENAME="content/posts/strategic-vision-$(date +%Y%m%d).md"
+          
           echo "---" > $FILENAME
-          echo "title: 'The Hidden Psychology of Atomic Habits: Why Most People Fail'" >> $FILENAME
+          echo "title: 'The Strategic Vision of Habit Formation: Deep Dive Analysis'" >> $FILENAME
           echo "date: '$(date +%Y-%m-%d)'" >> $FILENAME
-          echo "category: 'Habit Formation'" >> $FILENAME
+          echo "category: 'Behavioral Psychology'" >> $FILENAME
           echo "---" >> $FILENAME
           echo "" >> $FILENAME
-          echo "## Strategic Vision for Behavioral Change" >> $FILENAME
-          echo "Based on behavioral psychology research from BJ Fogg and Charles Duhigg, habits fail without proper environment design." >> $FILENAME
-          echo "In The Brightway Library, we analyze these frameworks to provide actionable insights for long-term growth." >> $FILENAME
+          echo "## Understanding the Science of Change" >> $FILENAME
+          echo "In the digital age, mastering your habits is the ultimate competitive advantage. Based on the research of BJ Fogg and Charles Duhigg, we explore how small changes lead to massive results." >> $FILENAME
+          echo "" >> $FILENAME
+          echo "### The Fogg Behavior Model (B=MAP)" >> $FILENAME
+          echo "BJ Fogg posits that behavior (B) happens when Motivation (M), Ability (A), and a Prompt (P) come together. At The Brightway Library, we apply this to financial literacy. If you want to master 'The Psychology of Money', you don't need more willpower; you need a better system." >> $FILENAME
+          echo "" >> $FILENAME
+          echo "### Financial Literacy and Habit Stacking" >> $FILENAME
+          echo "James Clear’s 'Atomic Habits' introduces habit stacking. By pairing a new habit with an existing one—like reading 5 pages of 'Rich Dad Poor Dad' while drinking your morning coffee—you reduce the friction of starting. This is the core of our strategic vision for user growth." >> $FILENAME
+          echo "" >> $FILENAME
+          echo "### Why Environment Matters" >> $FILENAME
+          echo "Environment design is the secret to long-term success. If your goal is to stay updated with global news via our library, make this site your browser's homepage. This simple 'Prompt' (as per Fogg's model) ensures that you stay informed without needing high motivation." >> $FILENAME
+          echo "" >> $FILENAME
+          echo "---" >> $FILENAME
+          echo "*This analysis was powered by The Brightway AI Engine for Strategic Vision.*" >> $FILENAME
 
       - name: Push to GitHub
         env:
@@ -35,5 +48,5 @@ jobs:
           git config --global user.name 'Brightway-Bot'
           git config --global user.email 'bot@thebrightway.com'
           git add .
-          git commit -m "Auto-post: New Habit Analysis Added [Skip CI]" || echo "No changes"
+          git commit -m "Auto-post: Daily Strategic Analysis [Skip CI]" || echo "No changes"
           git push origin main

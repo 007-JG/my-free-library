@@ -1,50 +1,48 @@
 import fs from 'fs';
 import path from 'path';
-import matter from 'gray-matter';
 
 export default function Home() {
-  // 1. Content folder se files ki list lena
   const postsDirectory = path.join(process.cwd(), 'content/posts');
   let posts = [];
 
+  // Agar folder exist karta hai toh files read karo
   if (fs.existsSync(postsDirectory)) {
     const fileNames = fs.readdirSync(postsDirectory);
     posts = fileNames.map((fileName) => {
       const fullPath = path.join(postsDirectory, fileName);
       const fileContents = fs.readFileSync(fullPath, 'utf8');
-      const { data } = matter(fileContents);
-      return {
-        slug: fileName.replace(/\.md$/, ''),
-        ...data,
-      };
+      
+      // Markdown se title aur date nikalne ka simple tarika
+      const title = fileContents.match(/title: '(.*?)'/)?.[1] || 'New Strategy';
+      const date = fileContents.match(/date: '(.*?)'/)?.[1] || 'Recent';
+      
+      return { slug: fileName.replace(/\.md$/, ''), title, date };
     });
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 p-8">
+    <main className="min-h-screen bg-white p-8 text-black">
       <div className="max-w-4xl mx-auto">
         <header className="mb-12 text-center">
-          <h1 className="text-4xl font-extrabold text-gray-900 mb-4">The Brightway Library</h1>
-          <p className="text-xl text-gray-600">Master your habits and finance with AI-driven insights.</p>
+          <h1 className="text-5xl font-black mb-4">THE BRIGHTWAY LIBRARY</h1>
+          <p className="text-xl text-gray-500">AI-Powered Book DNA & Strategic Vision</p>
         </header>
 
         <section>
-          <h2 className="text-2xl font-bold mb-6 border-b pb-2">Latest Strategic Insights</h2>
-          
-          {posts.length > 0 ? (
-            <div className="grid gap-6">
-              {posts.map((post) => (
-                <div key={post.slug} className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition">
-                  <span className="text-sm font-semibold text-blue-600 uppercase">{post.category}</span>
-                  <h3 className="text-xl font-bold mt-2">{post.title}</h3>
-                  <p className="text-gray-500 text-sm mt-1">Published on: {post.date}</p>
-                  <button className="mt-4 text-black font-medium underline">Read Analysis →</button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500 italic">Analyzing new books... Insights arriving soon.</p>
-          )}
+          <h2 className="text-2xl font-bold mb-8 uppercase tracking-widest border-b-2 border-black pb-2">Latest Insights</h2>
+          <div className="grid gap-8">
+            {posts.length > 0 ? posts.map((post) => (
+              <div key={post.slug} className="border-l-4 border-black pl-6 py-2 hover:bg-gray-50 transition">
+                <h3 className="text-2xl font-bold italic underline cursor-pointer">{post.title}</h3>
+                <p className="text-sm text-gray-400 mt-2">ANALYSIS DATE: {post.date}</p>
+              </div>
+            )) : (
+              <div className="p-10 border-2 border-dashed border-gray-200 text-center text-gray-400">
+                AI is currently analyzing "Atomic Habits" and "The Psychology of Money"... 
+                New insights will appear here automatically.
+              </div>
+            )}
+          </div>
         </section>
       </div>
     </main>
